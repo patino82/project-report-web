@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id             String       @id @default(cuid())
+  name           String
+  preparedBy     String?
+  structureType  String       @default("House")
+  scopeType      String       @default("FullRemodel")
+  thisWeekStart  DateTime
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  tasks          Task[]
+  dependencies   Dependency[]
+  taskStatuses   TaskStatus[]
+  lookahead      LookaheadEntry[]
+  versionLogs    VersionLog[]
+}
+
+model Task {
+  id                 String      @id @default(cuid())
+  projectId          String
+  taskId             String
+  taskName           String
+  phase              String?
+  trade              String?
+  ownerCompany       String
+  durationDays       Int
+  requiresInspection Boolean     @default(false)
+  callNow            Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  project            Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, taskId])
+  @@index([projectId, phase])
+  @@index([projectId, trade])
+}
+
+model Dependency {
+  id         String   @id @default(cuid())
+  projectId  String
+  fromTaskId String
+  toTaskId   String
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, fromTaskId, toTaskId])
+  @@index([projectId, toTaskId])
+}
+
+model TaskStatus {
+  id                 String   @id @default(cuid())
+  projectId          String
+  taskId             String
+  status             String
+  confirmedComplete  Boolean  @default(false)
+  inspectionRequired Boolean  @default(false)
+  inspectionPassed   Boolean  @default(false)
+  lastUpdated        DateTime?
+
+  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, taskId])
+}
+
+model Company {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  contacts  Contact[]
+  trades    CompanyTradeMap[]
+}
+
+model Trade {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  companies CompanyTradeMap[]
+}
+
+model CompanyTradeMap {
+  id         String   @id @default(cuid())
+  companyId  String
+  tradeId    String
+  isPrimary  Boolean  @default(false)
+  notes      String?
+
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trade      Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, tradeId])
+  @@index([tradeId])
+}
+
+model Contact {
+  id         String   @id @default(cuid())
+  companyId  String
+  name       String
+  phone      String?
+  email      String?
+  role       String?
+  isPrimary  Boolean  @default(false)
+
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model LookaheadEntry {
+  id         String   @id @default(cuid())
+  projectId  String
+  taskId     String
+  date       DateTime
+  symbol     String
+  notes      String?
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, taskId, date])
+  @@index([projectId, date])
+}
+
+model VersionLog {
+  id         String   @id @default(cuid())
+  projectId  String
+  timestamp  DateTime @default(now())
+  runType    String
+  countsJson Json?
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, timestamp])
+}
