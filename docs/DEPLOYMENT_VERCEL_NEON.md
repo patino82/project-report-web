@@ -21,6 +21,8 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DB?sslmode=require"
 AUTH_SECRET="..."
 AUTH_URL="https://your-vercel-domain.vercel.app"
 AUTH_TRUST_HOST="true"
+APP_BASIC_AUTH_USER="admin"
+APP_BASIC_AUTH_PASSWORD="long-random-private-beta-password"
 ```
 
 Generate `AUTH_SECRET` locally:
@@ -28,6 +30,11 @@ Generate `AUTH_SECRET` locally:
 ```bash
 openssl rand -base64 32
 ```
+
+`APP_BASIC_AUTH_USER` and `APP_BASIC_AUTH_PASSWORD` are the private-beta access
+gate. When both are set, all app pages and APIs except `/api/health` require
+browser Basic Auth. Leave them unset only for local development or after proper
+Auth.js user authentication is implemented.
 
 ## Neon setup
 
@@ -122,4 +129,7 @@ curl https://your-vercel-domain.vercel.app/api/projects
 
 ## Current risk
 
-Until Auth.js and tenant scoping are implemented, this app should be treated as a private/admin beta, not a public multi-tenant SaaS.
+Until Auth.js and tenant scoping are implemented, this app should be treated as
+a private/admin beta, not a public multi-tenant SaaS. Set the Basic Auth
+environment variables above before exposing a deployment URL beyond trusted
+testers.
