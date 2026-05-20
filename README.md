@@ -47,7 +47,7 @@ Production-ready superintendent web app with scheduling intelligence, lookahead 
 
 ## Quick Start (Local Dev)
 ```bash
-cd "/Users/papi/Desktop/Project Lookahead/Codex Project Report/project-report-web"
+cd "/Users/dave_patino/Desktop/Project Lookahead/Codex Project Report/project-report-web"
 npm install
 cp .env.example .env.local
 # Edit .env.local and set DATABASE_URL to your local/Dev Neon connection string.

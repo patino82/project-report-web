@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 // vi.mock() must be at the true module top level (hoisted by vitest).
 const db = vi.hoisted(() => {
   const $queryRaw = vi.fn();
@@ -10,8 +12,6 @@ vi.mock("@/lib/prisma", () => ({
     return db;
   },
 }));
-
-import { beforeEach, describe, expect, it } from "vitest";
 
 // ----------------------------------------------
 // 1. GET /api/health -- database OK (production)
