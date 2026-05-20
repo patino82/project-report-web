@@ -48,6 +48,21 @@ npm run test
 npm run build
 ```
 
+With the app running, validate the deployed/local runtime surface:
+
+```bash
+SMOKE_BASE_URL="http://localhost:3000" npm run smoke
+```
+
+If the private-beta Basic Auth gate is enabled, include credentials:
+
+```bash
+SMOKE_BASE_URL="https://your-vercel-domain.vercel.app" \
+SMOKE_BASIC_AUTH_USER="admin" \
+SMOKE_BASIC_AUTH_PASSWORD="your-private-beta-password" \
+npm run smoke
+```
+
 Then verify:
 
 - Craig F10 loads from `/api/projects`.
