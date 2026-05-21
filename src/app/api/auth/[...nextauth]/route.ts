@@ -33,6 +33,8 @@ export const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.sub = (user as any).id;
+        // include role on token when available
+        if ((user as any).role) token.role = (user as any).role;
       }
       return token;
     },
