@@ -111,7 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
       return NextResponse.json({ entry: null, cleared: true });
     }
 
-    const entry = await prisma.lookaheadEntry.upsert({
+    const entry = await (prisma.lookaheadEntry as any).upsert({
       where: { projectId_taskId_date: { projectId, taskId: payload.taskId, date } },
       create: { projectId, taskId: payload.taskId, date, symbol: payload.symbol, notes: payload.notes },
       update: { symbol: payload.symbol, notes: payload.notes },

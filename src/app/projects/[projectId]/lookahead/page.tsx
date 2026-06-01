@@ -35,21 +35,21 @@ export default async function LookaheadPage({ params }: { params: Promise<{ proj
   }));
 
   return (
-    <main className="lookahead-shell">
-      <div className="lookahead-page">
-        <section className="lookahead-hero">
+    <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="tma-card mb-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <p className="date-chip">{bundle.project.thisWeekStart.toISOString().slice(0, 10)}</p>
-            <h1>2-Week Lookahead</h1>
-            <p>{bundle.project.name} field plan, broken into phases with tap-to-save date marks.</p>
+            <p className="tma-date-chip">{bundle.project.thisWeekStart.toISOString().slice(0, 10)}</p>
+            <h1 className="text-2xl font-black tracking-tight text-ink">2-Week Lookahead</h1>
+            <p className="text-sm text-ink-muted mt-1">{bundle.project.name} field plan, broken into phases.</p>
           </div>
-          <div className="lookahead-hero-actions">
-            <Link href={`/projects/${projectId}`} className="btn btn-secondary">Back to Hub</Link>
-          </div>
-        </section>
-
-        <LookaheadGrid projectId={projectId} rows={rows} />
+          <Link className="tma-button-secondary text-[0.65rem] py-2 px-4" href={`/projects/${projectId}`}>
+            Back to Hub
+          </Link>
+        </div>
       </div>
-    </main>
+
+      <LookaheadGrid projectId={projectId} rows={rows} />
+    </div>
   );
 }

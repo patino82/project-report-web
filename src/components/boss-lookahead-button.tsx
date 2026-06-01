@@ -27,11 +27,11 @@ export function BossLookaheadButton({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="inline-action">
-      <button className="btn btn-warn" onClick={generate} disabled={busy}>
+    <div className="tma-inline-action">
+      <button className="tma-button-warn text-[0.65rem] py-2 px-4" onClick={generate} disabled={busy}>
         {busy ? "Generating..." : "Generate Boss 2-Week"}
       </button>
-      {msg ? <p className="text-xs text-slate-600">{msg}</p> : null}
+      {msg ? <p className="tma-text-xs text-ink-muted">{msg}</p> : null}
     </div>
   );
 }

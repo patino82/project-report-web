@@ -46,6 +46,27 @@ Production-ready superintendent web app with scheduling intelligence, lookahead 
 - `GET /api/sequence/templates`
 
 ## Quick Start (Local Dev)
+## Authentication (NextAuth)
+
+This app uses NextAuth with the Prisma adapter and Google provider.
+Required environment variables for local development and production:
+
+- DATABASE_URL (Postgres connection string used by Prisma)
+- NEXTAUTH_URL (e.g. http://localhost:3000)
+- NEXTAUTH_SECRET (a long, random string)
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+
+After updating your .env.local, generate the Prisma client and create a migration:
+
+```bash
+npm run prisma:generate
+npm run prisma:migrate -- --name add_nextauth_user
+```
+
+Recommendation: session.strategy is set to "jwt" by default in the implementation to reduce DB roundtrips for mobile-first/statically-rendered flows. Switch to "database" if you need server-persisted sessions across devices.
+
+
 ```bash
 cd "/Users/dave_patino/Desktop/Project Lookahead/Codex Project Report/project-report-web"
 npm install

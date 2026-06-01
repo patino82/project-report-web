@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import * as amplitude from "@amplitude/unified";
 
 type TaskStatusRow = {
   taskId: string;
@@ -39,6 +40,13 @@ export function StatusBoard({ projectId, rows }: { projectId: string; rows: Task
         throw new Error(data.error || "Failed to save status");
       }
       const timestamp = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      amplitude.track("Task Status Updated", {
+        project_id: projectId,
+        task_id: row.taskId,
+        status: row.status,
+        confirmed_complete: row.confirmedComplete,
+        inspection_passed: row.inspectionPassed,
+      });
       setSavedAt(timestamp);
       setMessage(`Saved ${row.taskId} at ${timestamp}.`);
     } catch (error) {
@@ -49,13 +57,13 @@ export function StatusBoard({ projectId, rows }: { projectId: string; rows: Task
   }
 
   return (
-    <div className="app-card p-4 table-scroll">
-      <h3 className="app-title text-xl mb-3">Task Status Board</h3>
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+    <section className="tma-card tma-table-scroll">
+      <h3 className="tma-section-title tma-mb-3">Task Status Board</h3>
+      <div className="tma-mb-3 tma-flex tma-flex-wrap tma-items-center tma-gap-2 tma-text-xs text-ink-dim">
         <p>{message || "Update the real task status rows for this project."}</p>
-        {savedAt ? <span className="pill">Last save {savedAt}</span> : null}
+        {savedAt ? <span className="tma-pill">Last save {savedAt}</span> : null}
       </div>
-      <table>
+      <table className="tma-table tma-table-compact">
         <thead>
           <tr>
             <th>Task</th>
@@ -73,7 +81,7 @@ export function StatusBoard({ projectId, rows }: { projectId: string; rows: Task
           ))}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 }
 
@@ -93,14 +101,15 @@ function StatusRow({
     <tr>
       <td>
         <div className="font-medium">{draft.taskName}</div>
-        <small>{draft.taskId}</small>
+        <small className="text-ink-muted">{draft.taskId}</small>
       </td>
       <td>{draft.ownerCompany}</td>
       <td>
-        <input value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value })} />
+        <input className="tma-input" value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value })} />
       </td>
       <td>
         <input
+          className="tma-checkbox"
           type="checkbox"
           checked={draft.confirmedComplete}
           onChange={(e) => setDraft({ ...draft, confirmedComplete: e.target.checked })}
@@ -108,6 +117,7 @@ function StatusRow({
       </td>
       <td>
         <input
+          className="tma-checkbox"
           type="checkbox"
           checked={draft.inspectionRequired}
           onChange={(e) => setDraft({ ...draft, inspectionRequired: e.target.checked })}
@@ -115,13 +125,14 @@ function StatusRow({
       </td>
       <td>
         <input
+          className="tma-checkbox"
           type="checkbox"
           checked={draft.inspectionPassed}
           onChange={(e) => setDraft({ ...draft, inspectionPassed: e.target.checked })}
         />
       </td>
       <td>
-        <button className="btn btn-secondary" onClick={() => onSave(draft)} disabled={busy}>
+        <button className="tma-button-secondary text-[0.65rem] py-2 px-3" onClick={() => onSave(draft)} disabled={busy}>
           {busy ? "Saving..." : "Save"}
         </button>
       </td>

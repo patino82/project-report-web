@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { buildSummary, computeTwoWeekDates, formatDateKey } from "@/lib/domain";
 import { loadProjectBundle } from "@/lib/project-data";
 import { prisma } from "@/lib/prisma";
+import { getAmplitudeClient, flushAmplitude } from "@/lib/amplitude-server";
 
 function toBuffer(doc: NodeJS.ReadableStream & { end: () => void }): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -117,6 +118,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
     const pdf = await toBuffer(doc);
     const bytes = new Uint8Array(pdf);
     const filename = `${summary.projectName.replace(/\s+/g, "_")}_2week_${summary.thisWeekStart}.pdf`;
+
+    const amp = getAmplitudeClient();
+    if (amp) {
+      amp.track("Report Downloaded", {
+        project_id: projectId,
+        project_name: summary.projectName,
+        format: asJson ? "json" : "pdf",
+        task_count: bundle.taskLite.length,
+      });
+      await flushAmplitude();
+    }
 
     return new NextResponse(bytes, {
       status: 200,

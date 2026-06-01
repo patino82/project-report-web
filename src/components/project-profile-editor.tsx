@@ -45,12 +45,12 @@ export function ProjectProfileEditor({
 
   if (!open) {
     return (
-      <div className="app-card p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="tma-card tma-flex tma-items-center tma-justify-between tma-flex-wrap tma-gap-3">
         <div>
-          <h3 className="app-title text-xl">Project Type</h3>
-          <p className="text-sm text-slate-600 mt-1">{structureType} / {scopeType}</p>
+          <h3 className="tma-section-title">Project Type</h3>
+          <p className="tma-text-xs text-ink-muted tma-mt-1">{structureType} / {scopeType}</p>
         </div>
-        <button className="btn btn-secondary" onClick={() => setOpen(true)}>
+        <button className="tma-button-secondary text-[0.65rem] py-2 px-4" onClick={() => setOpen(true)}>
           Edit
         </button>
       </div>
@@ -58,10 +58,11 @@ export function ProjectProfileEditor({
   }
 
   return (
-    <div className="app-card p-4">
-      <h3 className="app-title text-xl mb-2">Project Type</h3>
+    <div className="tma-card">
+      <h3 className="tma-section-title tma-mb-2">Project Type</h3>
       <div className="grid md:grid-cols-4 gap-2">
         <select
+          className="tma-select"
           value={structureType}
           onChange={(e) => {
             const value = e.target.value as StructureType;
@@ -75,7 +76,7 @@ export function ProjectProfileEditor({
           <option value="Condo">Condo</option>
         </select>
 
-        <select value={scopeType} onChange={(e) => setScopeType(e.target.value as ScopeType)}>
+        <select className="tma-select" value={scopeType} onChange={(e) => setScopeType(e.target.value as ScopeType)}>
           <option value="BathRemodel">Bath Remodel</option>
           <option value="PartialRemodel">Partial Remodel</option>
           <option value="FullRemodel">Full Remodel</option>
@@ -83,15 +84,15 @@ export function ProjectProfileEditor({
           {structureType === "House" ? <option value="NewBuild">New Build</option> : null}
         </select>
 
-        <button className="btn btn-primary" onClick={save} disabled={saving}>
+        <button className="tma-button text-[0.65rem] py-2 px-4" onClick={save} disabled={saving}>
           {saving ? "Saving..." : "Save Type"}
         </button>
 
-        <button className="btn btn-secondary" onClick={() => setOpen(false)} disabled={saving}>
+        <button className="tma-button-secondary text-[0.65rem] py-2 px-4" onClick={() => setOpen(false)} disabled={saving}>
           Cancel
         </button>
       </div>
-      {message ? <p className="text-sm mt-2">{message}</p> : null}
+      {message ? <p className="tma-text-xs tma-mt-2 text-ink-dim">{message}</p> : null}
     </div>
   );
 }

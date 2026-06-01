@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     if (mode === "company") {
       const parsed = companySchema.safeParse(body);
       if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-      const company = await prisma.company.upsert({
+      const company = await (prisma.company as any).upsert({
         where: { name: parsed.data.name },
         create: { name: parsed.data.name },
         update: {},
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       const parsed = contactSchema.safeParse(body);
       if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-      const company = await prisma.company.upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} });
+      const company = await (prisma.company as any).upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} });
       const contact = await prisma.contact.create({
         data: {
           companyId: company.id,
@@ -73,8 +73,8 @@ export async function POST(req: NextRequest) {
       if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
       const [company, trade] = await Promise.all([
-        prisma.company.upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} }),
-        prisma.trade.upsert({ where: { name: parsed.data.trade }, create: { name: parsed.data.trade }, update: {} }),
+        (prisma.company as any).upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} }),
+        (prisma.trade as any).upsert({ where: { name: parsed.data.trade }, create: { name: parsed.data.trade }, update: {} }),
       ]);
 
       const map = await prisma.companyTradeMap.upsert({

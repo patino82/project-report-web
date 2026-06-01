@@ -38,7 +38,21 @@ type CostResponse = {
   };
 };
 
-const defaultDraft = {
+type Draft = {
+  type: "ESTIMATE" | "PO";
+  trade: string;
+  vendor: string;
+  description: string;
+  estimateCode: string;
+  amount: string;
+  status: "DRAFT" | "APPROVED" | "ISSUED" | "PAID" | "VOID";
+  targetDate: string;
+  actualDate: string;
+  notes: string;
+  linkedEstimateId: string;
+};
+
+const defaultDraft: Draft = {
   type: "ESTIMATE",
   trade: "",
   vendor: "",
@@ -57,7 +71,7 @@ export function CostTracker({ projectId }: { projectId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [draft, setDraft] = useState({ ...defaultDraft });
+  const [draft, setDraft] = useState<Draft>({ ...defaultDraft });
 
   const estimateItems = useMemo(() => data?.items.filter((i) => i.type === "ESTIMATE") ?? [], [data]);
   const poItems = useMemo(() => data?.items.filter((i) => i.type === "PO") ?? [], [data]);
@@ -120,10 +134,10 @@ export function CostTracker({ projectId }: { projectId: string }) {
   }
 
   return (
-    <section className="app-card p-4 section-pop space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="app-title text-2xl section-heading">Cost Intelligence (PO + Estimates)</h3>
-        <button className="btn btn-secondary" onClick={load} disabled={loading}>
+    <section className="tma-space-y-4">
+      <div className="tma-card tma-flex tma-flex-wrap tma-items-center tma-justify-between tma-gap-2">
+        <h3 className="tma-section-title tma-section-pop">Cost Intelligence (PO + Estimates)</h3>
+        <button className="tma-button-secondary text-[0.65rem] py-2 px-4" onClick={load} disabled={loading}>
           {loading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
@@ -143,39 +157,41 @@ export function CostTracker({ projectId }: { projectId: string }) {
         />
       </div>
 
-      <div className="app-card p-3">
-        <h4 className="app-title text-xl mb-2">Add Estimate / PO</h4>
-        <div className="grid md:grid-cols-4 gap-2">
-          <select value={draft.type} onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value }))}>
+      <div className="tma-card">
+        <h4 className="tma-section-title tma-mb-2">Add Estimate / PO</h4>
+        <div className="tma-cost-form-grid tma-mb-2">
+          <select className="tma-select" value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value as "ESTIMATE" | "PO" })}>
             <option value="ESTIMATE">Estimate</option>
             <option value="PO">PO</option>
           </select>
-          <input placeholder="Trade (e.g. Framing)" value={draft.trade} onChange={(e) => setDraft((d) => ({ ...d, trade: e.target.value }))} />
-          <input placeholder="Vendor" value={draft.vendor} onChange={(e) => setDraft((d) => ({ ...d, vendor: e.target.value }))} />
-          <input placeholder="Estimate Code" value={draft.estimateCode} onChange={(e) => setDraft((d) => ({ ...d, estimateCode: e.target.value }))} />
-          <input className="md:col-span-2" placeholder="Description" value={draft.description} onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))} />
-          <input placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft((d) => ({ ...d, amount: e.target.value }))} />
-          <select value={draft.status} onChange={(e) => setDraft((d) => ({ ...d, status: e.target.value }))}>
+          <input className="tma-input" placeholder="Trade (e.g. Framing)" value={draft.trade} onChange={(e) => setDraft({ ...draft, trade: e.target.value })} />
+          <input className="tma-input" placeholder="Vendor" value={draft.vendor} onChange={(e) => setDraft({ ...draft, vendor: e.target.value })} />
+          <input className="tma-input" placeholder="Estimate Code" value={draft.estimateCode} onChange={(e) => setDraft({ ...draft, estimateCode: e.target.value })} />
+          <input className="tma-input md:col-span-2" placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+          <input className="tma-input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
+          <select className="tma-select" value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value as "DRAFT" | "APPROVED" | "ISSUED" | "PAID" | "VOID" })}>
             <option value="DRAFT">DRAFT</option>
             <option value="APPROVED">APPROVED</option>
             <option value="ISSUED">ISSUED</option>
             <option value="PAID">PAID</option>
             <option value="VOID">VOID</option>
           </select>
-          <input placeholder="Target Date" type="date" value={draft.targetDate} onChange={(e) => setDraft((d) => ({ ...d, targetDate: e.target.value }))} />
-          <input placeholder="Actual Date" type="date" value={draft.actualDate} onChange={(e) => setDraft((d) => ({ ...d, actualDate: e.target.value }))} />
-          <input placeholder="Linked Estimate ID (for PO)" value={draft.linkedEstimateId} onChange={(e) => setDraft((d) => ({ ...d, linkedEstimateId: e.target.value }))} />
-          <input className="md:col-span-3" placeholder="Notes" value={draft.notes} onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))} />
+          <input className="tma-input" placeholder="Target Date" type="date" value={draft.targetDate} onChange={(e) => setDraft({ ...draft, targetDate: e.target.value })} />
+          <input className="tma-input" placeholder="Actual Date" type="date" value={draft.actualDate} onChange={(e) => setDraft({ ...draft, actualDate: e.target.value })} />
+          <input className="tma-input" placeholder="Linked Estimate ID (for PO)" value={draft.linkedEstimateId} onChange={(e) => setDraft({ ...draft, linkedEstimateId: e.target.value })} />
+          <input className="tma-input md:col-span-3" placeholder="Notes" value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
         </div>
-        <div className="mt-2">
-          <button className="btn btn-primary" onClick={createItem} disabled={saving}>{saving ? "Saving..." : "Save Item"}</button>
+        <div className="tma-mt-2">
+          <button className="tma-button text-[0.65rem] py-2 px-4" onClick={createItem} disabled={saving}>
+            {saving ? "Saving..." : "Save Item"}
+          </button>
         </div>
-        {error ? <p className="text-sm text-red-700 mt-2">{error}</p> : null}
+        {error ? <p className="tma-text-xs tma-mt-2 text-red-400">{error}</p> : null}
       </div>
 
-      <div className="app-card p-3 table-scroll">
-        <h4 className="app-title text-xl mb-2">Trade Estimate Accuracy</h4>
-        <table>
+      <div className="tma-card tma-table-scroll">
+        <h4 className="tma-section-title tma-mb-2">Trade Estimate Accuracy</h4>
+        <table className="tma-table tma-table-compact">
           <thead>
             <tr>
               <th>Trade</th>
@@ -189,7 +205,7 @@ export function CostTracker({ projectId }: { projectId: string }) {
           <tbody>
             {(data?.insights.byTrade ?? []).map((r) => (
               <tr key={r.trade}>
-                <td>{r.trade}</td>
+                <td><span className="tma-table-name">{r.trade}</span></td>
                 <td>{money(r.estimateTotal)}</td>
                 <td>{money(r.poTotal)}</td>
                 <td>{money(r.variance)}</td>
@@ -199,7 +215,7 @@ export function CostTracker({ projectId }: { projectId: string }) {
             ))}
             {!data?.insights.byTrade.length ? (
               <tr>
-                <td colSpan={6}>No cost history yet. Add estimates and POs to build future estimating intelligence.</td>
+                <td colSpan={6} className="tma-empty">No cost history yet. Add estimates and POs to build future estimating intelligence.</td>
               </tr>
             ) : null}
           </tbody>
@@ -215,20 +231,20 @@ export function CostTracker({ projectId }: { projectId: string }) {
 }
 
 function Metric({ title, value, tone }: { title: string; value: string; tone: "ok" | "warn" | "bad" }) {
-  const toneClass = tone === "bad" ? "metric-bad" : tone === "warn" ? "metric-warn" : "";
+  const toneClass = tone === "bad" ? "tma-metric-bad" : tone === "warn" ? "tma-metric-warn" : "tma-metric";
   return (
-    <div className={`app-card p-3 metric-card ${toneClass}`}>
-      <div className="text-xs uppercase tracking-wide text-slate-500">{title}</div>
-      <div className="text-2xl font-semibold">{value}</div>
+    <div className={toneClass}>
+      <div className="tma-metric-label">{title}</div>
+      <div className="tma-metric-value">{value}</div>
     </div>
   );
 }
 
 function ListCard({ title, items }: { title: string; items: CostItem[] }) {
   return (
-    <div className="app-card p-3 table-scroll">
-      <h4 className="app-title text-xl mb-2">{title}</h4>
-      <table>
+    <div className="tma-card tma-table-scroll">
+      <h4 className="tma-section-title tma-mb-2">{title}</h4>
+      <table className="tma-table tma-table-compact">
         <thead>
           <tr>
             <th>Trade</th>
@@ -241,7 +257,7 @@ function ListCard({ title, items }: { title: string; items: CostItem[] }) {
         <tbody>
           {items.map((i) => (
             <tr key={i.id}>
-              <td>{i.trade}</td>
+              <td><span className="tma-table-name">{i.trade}</span></td>
               <td>{i.description}</td>
               <td>{i.vendor || "-"}</td>
               <td>{i.status}</td>
@@ -250,7 +266,7 @@ function ListCard({ title, items }: { title: string; items: CostItem[] }) {
           ))}
           {!items.length ? (
             <tr>
-              <td colSpan={5}>No items yet.</td>
+              <td colSpan={5} className="tma-empty">No items yet.</td>
             </tr>
           ) : null}
         </tbody>

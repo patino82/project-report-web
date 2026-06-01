@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import * as amplitude from "@amplitude/unified";
 
 export function TemplateApplier({ projectId }: { projectId: string }) {
   const [constructionType, setConstructionType] = useState<"Condo" | "House">("House");
@@ -29,20 +30,27 @@ export function TemplateApplier({ projectId }: { projectId: string }) {
       return;
     }
 
+    amplitude.track("Template Applied", {
+      project_id: projectId,
+      construction_type: constructionType,
+      scope: selectedScope,
+      clear_existing: clearExisting,
+      tasks_imported: data.tasksImported,
+    });
     setMessage(`Applied ${constructionType} + ${selectedScope}. Imported ${data.tasksImported} tasks. Refresh page to view.`);
   }
 
   return (
-    <div className="app-card p-4">
-      <h3 className="app-title text-xl mb-2">Sequence Builder</h3>
-      <p className="text-sm text-slate-600 mb-3">Detailed template packs, including `House + New Construction`.</p>
+    <section className="tma-card">
+      <h3 className="tma-section-title tma-mb-2">Sequence Builder</h3>
+      <p className="tma-text-xs text-ink-muted tma-mb-3">Detailed template packs, including `House + New Construction`.</p>
       <div className="grid md:grid-cols-4 gap-2">
-        <select value={constructionType} onChange={(e) => setConstructionType(e.target.value as "Condo" | "House")}>
+        <select className="tma-select" value={constructionType} onChange={(e) => setConstructionType(e.target.value as "Condo" | "House")}>
           <option value="House">House</option>
           <option value="Condo">Condo</option>
         </select>
 
-        <select value={scope} onChange={(e) => setScope(e.target.value as "BathRemodel" | "PartialRemodel" | "FullRemodel" | "Addition" | "NewBuild")}>
+        <select className="tma-select" value={scope} onChange={(e) => setScope(e.target.value as "BathRemodel" | "PartialRemodel" | "FullRemodel" | "Addition" | "NewBuild")}>
           {options.map((o) => (
             <option key={o} value={o}>
               {o}
@@ -50,16 +58,16 @@ export function TemplateApplier({ projectId }: { projectId: string }) {
           ))}
         </select>
 
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={clearExisting} onChange={(e) => setClearExisting(e.target.checked)} />
+        <label className="tma-flex tma-items-center tma-gap-2 tma-text-xs text-ink-dim">
+          <input className="tma-checkbox" type="checkbox" checked={clearExisting} onChange={(e) => setClearExisting(e.target.checked)} />
           Replace Existing Sequence
         </label>
 
-        <button className="btn btn-primary" type="button" onClick={applyTemplate}>
+        <button className="tma-button text-[0.65rem] py-2 px-4" type="button" onClick={applyTemplate}>
           Apply Template
         </button>
       </div>
-      {message ? <p className="text-sm mt-2">{message}</p> : null}
-    </div>
+      {message ? <p className="tma-text-xs tma-mt-2 text-ink-dim">{message}</p> : null}
+    </section>
   );
 }

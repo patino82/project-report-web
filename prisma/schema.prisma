@@ -8,24 +8,92 @@ datasource db {
 }
 
 model Project {
-  id             String       @id @default(cuid())
-  name           String
-  preparedBy     String?
-  structureType  String       @default("House")
-  scopeType      String       @default("FullRemodel")
-  thisWeekStart  DateTime
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id            String           @id @default(cuid())
+  name          String
+  preparedBy    String?
+  structureType String           @default("House")
+  scopeType     String           @default("FullRemodel")
+  thisWeekStart DateTime
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  location      String?
+  notionId      String?
+  status        String           @default("active")
+  dependencies  Dependency[]
+  lookahead     LookaheadEntry[]
+  tasks         Task[]
+  taskStatuses  TaskStatus[]
+  versionLogs   VersionLog[]
+}
 
-  tasks          Task[]
-  dependencies   Dependency[]
-  taskStatuses   TaskStatus[]
-  lookahead      LookaheadEntry[]
-  versionLogs    VersionLog[]
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @map("refresh_token")
+  access_token      String? @map("access_token")
+  expires_at        Int?    @map("expires_at")
+  token_type        String? @map("token_type")
+  scope             String?
+  id_token          String? @map("id_token")
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SiteLog {
+  id        String   @id @default(cuid())
+  notionId  String?  @unique
+  projectId String
+  date      DateTime
+  content   String
+  author    String
+  createdAt DateTime @default(now())
+}
+
+model OpenItem {
+  id          String    @id @default(cuid())
+  notionId    String?   @unique
+  projectId   String
+  description String
+  priority    String    @default("Medium")
+  dueDate     DateTime?
+  status      String    @default("Open")
+  createdAt   DateTime  @default(now())
 }
 
 model Task {
-  id                 String      @id @default(cuid())
+  id                 String   @id @default(cuid())
   projectId          String
   taskId             String
   taskName           String
@@ -33,12 +101,12 @@ model Task {
   trade              String?
   ownerCompany       String
   durationDays       Int
-  requiresInspection Boolean     @default(false)
-  callNow            Boolean     @default(false)
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-
-  project            Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requiresInspection Boolean  @default(false)
+  callNow            Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  notionId           String?
+  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, taskId])
   @@index([projectId, phase])
@@ -46,84 +114,78 @@ model Task {
 }
 
 model Dependency {
-  id         String   @id @default(cuid())
+  id         String  @id @default(cuid())
   projectId  String
   fromTaskId String
   toTaskId   String
-
-  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, fromTaskId, toTaskId])
   @@index([projectId, toTaskId])
 }
 
 model TaskStatus {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   projectId          String
   taskId             String
   status             String
-  confirmedComplete  Boolean  @default(false)
-  inspectionRequired Boolean  @default(false)
-  inspectionPassed   Boolean  @default(false)
+  confirmedComplete  Boolean   @default(false)
+  inspectionRequired Boolean   @default(false)
+  inspectionPassed   Boolean   @default(false)
   lastUpdated        DateTime?
-
-  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project            Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, taskId])
 }
 
 model Company {
-  id        String          @id @default(cuid())
-  name      String          @unique
-  contacts  Contact[]
-  trades    CompanyTradeMap[]
+  id       String            @id @default(cuid())
+  name     String
+  trades   CompanyTradeMap[]
+  contacts Contact[]
 }
 
 model Trade {
-  id        String          @id @default(cuid())
-  name      String          @unique
+  id        String            @id @default(cuid())
+  name      String            @unique
   companies CompanyTradeMap[]
 }
 
 model CompanyTradeMap {
-  id         String   @id @default(cuid())
-  companyId  String
-  tradeId    String
-  isPrimary  Boolean  @default(false)
-  notes      String?
-
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  trade      Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  companyId String
+  tradeId   String
+  isPrimary Boolean @default(false)
+  notes     String?
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trade     Trade   @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, tradeId])
   @@index([tradeId])
 }
 
 model Contact {
-  id         String   @id @default(cuid())
-  companyId  String
-  name       String
-  phone      String?
-  email      String?
-  role       String?
-  isPrimary  Boolean  @default(false)
-
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  companyId String
+  name      String
+  phone     String?
+  email     String?
+  role      String?
+  isPrimary Boolean @default(false)
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([companyId])
 }
 
 model LookaheadEntry {
-  id         String   @id @default(cuid())
-  projectId  String
-  taskId     String
-  date       DateTime
-  symbol     String
-  notes      String?
+  id        String   @id @default(cuid())
+  projectId String
+  taskId    String
+  date      DateTime
+  symbol    String
+  notes     String?
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@unique([projectId, taskId, date])
   @@index([projectId, date])
 }
 
@@ -133,7 +195,6 @@ model VersionLog {
   timestamp  DateTime @default(now())
   runType    String
   countsJson Json?
-
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, timestamp])

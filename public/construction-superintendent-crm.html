@@ -1,0 +1,866 @@
+<!doctype html>
+<!--
+  Project Lookahead CRM — standalone modern prototype
+  Updated: 2026-05-20
+  Safe-revert note: separate file. Existing site and construction-superintendent-crm.html were not modified.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Lookahead CRM</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0e12;
+      --ink: #e6e9ec;
+      --muted: #7a8199;
+      --soft: #11151c;
+      --card: rgba(22, 28, 36, .82);
+      --card-solid: #161c24;
+      --line: rgba(255, 255, 255, .08);
+      --brand: #e07b35;
+      --brand-2: #f0944f;
+      --teal: #2d736f;
+      --blue: #3b82f6;
+      --purple: #a89bb0;
+      --danger: #ef4444;
+      --ok: #10b981;
+      --amber: #f59e0b;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .45);
+      --shadow-soft: 0 12px 36px rgba(0, 0, 0, .28);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% -8%, rgba(224, 123, 53, .10), transparent 28rem),
+        radial-gradient(circle at 92% 2%, rgba(45, 115, 111, .08), transparent 26rem),
+        linear-gradient(145deg, #0b0e12 0%, #0f1319 48%, #0c1117 100%);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    h1, h2, h3, p { margin: 0; }
+
+    .app-shell {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      height: calc(100vh - 36px);
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(14, 18, 24, .72);
+      backdrop-filter: blur(22px);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+    }
+    .logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 17px;
+      background: #161c24;
+      border: 2px solid var(--brand);
+      box-shadow: 0 12px 36px rgba(224, 123, 53, .28);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--brand);
+      font-weight: 950;
+      letter-spacing: -.08em;
+    }
+
+    .brand strong { display: block; font-size: 15px; letter-spacing: -.02em; color: var(--ink); }
+    .brand span { display: block; color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; margin-top: 2px; }
+
+    .nav-title {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+      padding: 0 10px;
+    }
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+    .tab {
+      border: 0;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 14px;
+      color: #9aa1b5;
+      background: transparent;
+      font-weight: 850;
+      transition: transform .18s ease, background .18s ease, color .18s ease;
+    }
+    .tab:hover { transform: translateX(3px); background: rgba(255, 255, 255, .05); }
+    .tab.active {
+      color: #fff;
+      background: #161c24;
+      border: 1px solid var(--brand);
+      box-shadow: 0 8px 24px rgba(224, 123, 53, .18);
+    }
+    .ico {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(224, 123, 53, .12);
+    }
+    .tab.active .ico { background: rgba(224, 123, 53, .22); }
+    .count {
+      min-width: 25px;
+      text-align: center;
+      padding: 4px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--brand-2);
+      background: rgba(224, 123, 53, .15);
+    }
+    .tab.active .count { color: #fff; background: rgba(224, 123, 53, .28); }
+
+    .sidebar-card {
+      margin-top: auto;
+      border-radius: 16px;
+      padding: 14px;
+      color: #fff;
+      background: linear-gradient(145deg, #161c24, #1a2230);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+    .sidebar-card .small { color: var(--brand-2); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
+    .sidebar-card strong { display: block; margin-top: 8px; font-size: 25px; letter-spacing: -.06em; color: var(--ink); }
+    .sidebar-card p { margin-top: 6px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+
+    .main { min-width: 0; }
+    .topbar {
+      position: sticky;
+      top: 18px;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(14, 18, 24, .75);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 10px 34px rgba(0,0,0,.22);
+    }
+    .command {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #11161e;
+      border: 1px solid var(--line);
+    }
+    .command input {
+      border: 0;
+      outline: 0;
+      width: 100%;
+      background: transparent;
+      color: var(--ink);
+    }
+    .top-actions { display: flex; gap: 9px; align-items: stretch; }
+    .top-actions .btn { flex: 1 1 0; white-space: nowrap; }
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 15px;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 8px 20px rgba(224, 123, 53, .22);
+    }
+    .btn.secondary { color: var(--ink); background: #1a2030; box-shadow: none; border: 1px solid var(--line); }
+
+    .section-head { display: flex; justify-content: space-between; gap: 14px; align-items: end; margin: 10px 2px 14px; }
+    .section-head h2 { font-size: clamp(28px, 4vw, 46px); letter-spacing: -.07em; color: var(--ink); }
+    .section-head p { margin-top: 5px; color: var(--muted); max-width: 720px; line-height: 1.45; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      padding: 26px;
+      color: var(--ink);
+      background: linear-gradient(135deg, #161c24 0%, #1a2230 48%, #161c24 100%);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.35fr .65fr; gap: 18px; align-items: end; }
+    .eyebrow { color: var(--brand-2); font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin-top: 10px; font-size: clamp(40px, 7vw, 88px); line-height: .86; letter-spacing: -.08em; max-width: 820px; color: var(--ink); }
+    .hero p { margin-top: 14px; max-width: 720px; color: var(--muted); font-size: 16px; line-height: 1.55; }
+    .hero-panel {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(22, 28, 36, .60);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+    .big-number { font-size: 52px; line-height: .95; font-weight: 950; letter-spacing: -.08em; color: var(--brand); }
+    .hero-panel p { margin-top: 6px; font-size: 13px; color: var(--muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255,255,255,.08);
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid var(--line);
+    }
+    .chip.dark { color: var(--ink); background: rgba(22, 28, 36, .76); border: 1px solid var(--brand); }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .kpi {
+      position: relative;
+      overflow: hidden;
+      min-height: 118px;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+    .kpi::after {
+      content: "";
+      position: absolute;
+      right: -34px;
+      bottom: -42px;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: rgba(224, 123, 53, .12);
+    }
+    .kpi.blue::after { background: rgba(59, 130, 246, .10); }
+    .kpi.green::after { background: rgba(16, 185, 129, .10); }
+    .kpi.purple::after { background: rgba(168, 155, 176, .10); }
+    .kpi span { color: var(--muted); font-size: 10px; font-weight: 950; text-transform: uppercase; letter-spacing: .1em; }
+    .kpi strong { display: block; margin-top: 14px; font-size: 38px; line-height: .9; letter-spacing: -.07em; color: var(--ink); }
+    .kpi small { display: block; margin-top: 9px; color: var(--muted); font-weight: 700; }
+
+    .panel { display: none; animation: fadeUp .22s ease both; }
+    .panel.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .section-head { display: flex; justify-content: space-between; gap: 14px; align-items: end; margin: 10px 2px 14px; }
+    .section-head h2 { font-size: clamp(28px, 4vw, 46px); letter-spacing: -.07em; }
+    .section-head p { margin-top: 5px; color: var(--muted); max-width: 720px; line-height: 1.45; }
+
+    .workspace { display: grid; grid-template-columns: minmax(320px, .82fr) minmax(0, 1.18fr); gap: 14px; align-items: start; }
+    .card {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-soft);
+    }
+    .card.solid { background: var(--card-solid); }
+    .card h3 { font-size: 16px; font-weight: 900; letter-spacing: -.03em; color: var(--ink); }
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.45; margin-top: 6px; }
+
+    label { display: block; margin: 12px 0 7px; color: var(--muted); font-size: 11px; font-weight: 950; text-transform: uppercase; letter-spacing: .1em; }
+    input, select, textarea {
+      width: 100%;
+      outline: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 13px 14px;
+      background: rgba(255, 255, 255, .04);
+      color: var(--ink);
+      transition: border .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(224, 123, 53, .12); background: rgba(255, 255, 255, .06); }
+    textarea { min-height: 104px; resize: vertical; }
+    .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+    .toolbar input, .toolbar select { max-width: 260px; }
+
+    .record {
+      position: relative;
+      overflow: hidden;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(20, 27, 35, .90);
+      box-shadow: 0 8px 20px rgba(0,0,0,.15);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .record:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(0,0,0,.22); }
+    .record.tint-orange { background: linear-gradient(135deg, rgba(224,123,53,.08), rgba(20,27,35,.90)); }
+    .record.tint-blue { background: linear-gradient(135deg, rgba(45,115,111,.08), rgba(20,27,35,.90)); }
+    .record.tint-pink { background: linear-gradient(135deg, rgba(180,80,80,.07), rgba(20,27,35,.90)); }
+    .record-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .title { font-size: 16px; font-weight: 900; letter-spacing: -.03em; color: var(--ink); }
+    .meta { margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.35; font-weight: 600; }
+    .badge { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; white-space: nowrap; letter-spacing: .05em; text-transform: uppercase; }
+    .badge.green { color: #10b981; background: rgba(16, 185, 129, .12); }
+    .badge.blue { color: #3b82f6; background: rgba(59, 130, 246, .12); }
+    .badge.amber { color: #f59e0b; background: rgba(245, 158, 11, .12); }
+    .badge.red { color: #ef4444; background: rgba(239, 68, 68, .12); }
+    .badge.dark { color: var(--ink); background: rgba(22, 28, 36, .76); border: 1px solid var(--line); }
+    .badge.purple { color: #a89bb0; background: rgba(168, 155, 176, .12); }
+    .progress { height: 3px; border-radius: 999px; overflow: hidden; background: var(--line); margin-top: 13px; }
+    .bar { width: var(--w); height: 100%; border-radius: inherit; background: var(--brand); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+    .mini { border: 0; border-radius: 8px; padding: 8px 12px; color: var(--ink); background: rgba(255,255,255,.06); border: 1px solid var(--line); font-size: 11px; font-weight: 900; }
+    .mini.primary { color: #fff; background: var(--brand); border-color: var(--brand); }
+
+    .focus-grid { display: grid; gap: 11px; }
+    .focus {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(20, 27, 35, .90);
+      border: 1px solid var(--line);
+    }
+    .pulse { width: 13px; height: 13px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 7px rgba(224, 123, 53, .12); }
+    .pulse.blue { background: var(--blue); box-shadow: 0 0 0 7px rgba(59, 130, 246, .12); }
+    .pulse.green { background: var(--ok); box-shadow: 0 0 0 7px rgba(16, 185, 129, .12); }
+    .empty { padding: 22px; text-align: center; border: 1px dashed rgba(255, 255, 255, .08); border-radius: 16px; color: var(--muted); background: rgba(255, 255, 255, .03); }
+    .toast { display: none; margin-top: 11px; padding: 11px 13px; border-radius: 14px; color: var(--brand-2); background: #161c25; font-weight: 900; border: 1px solid rgba(224, 123, 53, .2); }
+
+    .mobile-tabs { display: none; }
+    .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+    .project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .project-card { border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: var(--card-solid); box-shadow: 0 8px 20px rgba(0,0,0,.15); cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
+    .project-card:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(0,0,0,.22); border-color: var(--brand); }
+    .project-card.active { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(224, 123, 53, .2); }
+    .calendar-card input { font-size: 18px; font-weight: 850; }
+    .month-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; margin-top: 14px; }
+    .day-head { color: var(--muted); font-size: 11px; font-weight: 950; letter-spacing: .08em; text-align: center; text-transform: uppercase; padding: 8px 4px; }
+    .day-cell { min-height: 112px; border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: var(--card-solid); display: flex; flex-direction: column; gap: 7px; }
+    .day-cell.muted { opacity: .38; }
+    .day-cell.today { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(224, 123, 53, .2); }
+    .day-num { font-weight: 950; color: var(--ink); }
+    .cal-event { padding: 5px 7px; border-radius: 8px; background: rgba(224, 123, 53, .15); color: var(--brand-2); font-size: 10px; font-weight: 850; line-height: 1.2; }
+    .gantt { display: grid; gap: 9px; margin-top: 14px; overflow-x: auto; }
+    .gantt-row { display: grid; grid-template-columns: 190px repeat(14, minmax(34px, 1fr)); gap: 3px; align-items: stretch; min-width: 760px; }
+    .gantt-label { padding: 10px; border-radius: 12px; background: rgba(22, 28, 36, .60); border: 1px solid var(--line); font-size: 12px; font-weight: 900; color: var(--ink); }
+    .gantt-day { padding: 8px 4px; text-align: center; color: var(--muted); font-size: 11px; font-weight: 950; }
+    .gantt-cell { min-height: 34px; border-radius: 8px; background: rgba(255, 255, 255, .04); }
+    .gantt-cell.active { background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+    .print-only { display: none; }
+    .footer-note { padding: 26px 4px 8px; text-align: center; color: var(--muted); font-size: 12px; }
+
+    @media print {
+      body { background: #fff; }
+      .sidebar, .topbar, .hero, .kpi-grid, .mobile-tabs, .footer-note, .no-print, .panel:not(#tab-schedule) { display: none !important; }
+      .app-shell { display: block; padding: 0; width: 100%; }
+      .main { width: 100%; }
+      #tab-schedule { display: block !important; }
+      .card, .record, .day-cell, .gantt-label { box-shadow: none !important; break-inside: avoid; }
+      .print-only { display: block; margin-bottom: 16px; }
+      .month-calendar { gap: 4px; }
+      .day-cell { min-height: 86px; }
+    }
+
+    @media (max-width: 1080px) {
+      .app-shell { grid-template-columns: 1fr; padding-bottom: 88px; }
+      .sidebar { display: none; }
+      .mobile-tabs {
+        display: flex;
+        position: fixed;
+        z-index: 50;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        gap: 8px;
+        align-items: stretch;
+        overflow-x: auto;
+        padding: 9px;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: rgba(12, 16, 22, .85);
+        backdrop-filter: blur(22px);
+        box-shadow: var(--shadow);
+      }
+      .mobile-tabs .tab { flex: 1 1 0; grid-template-columns: auto; min-width: 0; min-height: 58px; justify-items: center; text-align: center; padding: 6px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; line-height: 1.05; font-weight: 900; color: #9aa1b5; border-radius: 14px; }
+      .mobile-tabs .tab.active { background: #161c24; color: var(--brand); border: 1px solid var(--brand); }
+      .mobile-tabs .tab .ico { width: auto; height: auto; min-height: 0; border-radius: 0; background: transparent; display: grid; place-items: center; font-size: 28px; line-height: 1; }
+      .mobile-tabs .tab.active .ico { background: transparent; }
+      .mobile-tabs .tab span:not(.ico):not(.count) { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .mobile-tabs .tab .count { display: none; }
+      .topbar { top: 10px; }
+      .hero-grid, .workspace { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .app-shell { padding: 10px 10px 88px; }
+      .topbar { grid-template-columns: 1fr; border-radius: 22px; }
+      .top-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .hero { border-radius: 30px; padding: 20px; }
+      h1 { font-size: 46px; }
+      .kpi-grid, .two, .three, .home-grid, .project-grid { grid-template-columns: 1fr; }
+      .toolbar input, .toolbar select { max-width: none; }
+      .section-head { display: block; }
+      .month-calendar { gap: 4px; }
+      .day-cell { min-height: 82px; border-radius: 14px; padding: 7px; }
+      .cal-event { font-size: 10px; padding: 4px 5px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="logo">⚡</div><div><strong>PROJECT LOOKAHEAD</strong><span>Field Command</span></div></div>
+      <div class="nav-title">Workspace</div>
+      <nav class="nav" id="desktopNav"></nav>
+      <div class="sidebar-card"><div class="small">This week</div><strong id="sideWeek">Loading</strong><p>Use Today first. Everything else supports the next best action.</p></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="command"><span>⌘</span><input id="globalSearch" placeholder="Search tasks, companies, contacts, notes…" oninput="handleGlobalSearch()" /></div>
+        <div class="top-actions"><button class="btn secondary theme-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀️</button><button class="btn secondary" onclick="setTab('openitems')">Open Items</button><button class="btn" onclick="setTab('daily'); focusDailyLog()">Add Field Note</button></div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div><div class="eyebrow">Project Lookahead · Field Command</div><h1>Your jobsite command center.</h1><p>A superintendent-first app for running custom home jobsiteKPIections: today's priorities, lookahead schedule, daily logs, open selections, long-lead materials, trade commitments, and document memory for future estimating intelligence.</p><div class="chips"><span class="chip">⚡ Fast field notes</span><span class="chip">🎯 One focus queue</span><span class="chip dark">🏠 Custom homes</span></div></div>
+          <div class="hero-panel"><div class="eyebrow">Attention needed</div><div class="big-number" id="heroRiskCount">0</div><p id="heroRiskText">Items need decisions, inspections, material tracking, or follow-up.</p><div class="chips"><span class="chip">2-week</span><span class="chip">Open items</span><span class="chip">Docs</span></div></div>
+        </div>
+      </section>
+
+      <section class="kpi-grid">
+        <div class="kpi"><span>Open tasks</span><strong id="openTaskCount">0</strong><small>Live from lookahead list</small></div>
+        <div class="kpi blue"><span>Subs / Vendors</span><strong id="companyCount">0</strong><small>Companies + contacts</small></div>
+        <div class="kpi green"><span>Need decision</span><strong id="decisionCount">0</strong><small>Blockers and inspections</small></div>
+        <div class="kpi purple"><span>Cost exposure</span><strong id="costTotal">$0</strong><small>POs, invoices, risks</small></div>
+      </section>
+
+      <section class="panel active" id="tab-today">
+        <div class="section-head"><div><h2>Today</h2><p>The default screen. It only shows what matters next so the app is easy to use when the day is chaotic.</p></div><button class="btn secondary" onclick="renderAll()">Refresh</button></div>
+        <div class="home-grid"><div class="card solid"><div class="record-head"><h3>Open tasks</h3><span class="badge dark" id="todayTaskCount">0 open</span></div><p class="hint">The tasks and follow-ups that matter today.</p><div class="list" id="todayTaskList"></div></div><div class="card"><h3>Daily log</h3><p class="hint">Fast path to today’s field record.</p><div class="focus-grid" id="todayLogPreview"></div><div class="actions"><button class="btn" onclick="setTab('daily'); focusDailyLog()">Add field note</button><button class="btn secondary" onclick="setTab('daily')">Open log</button></div></div><div class="card calendar-card"><h3>Calendar</h3><p class="hint">Pick the work date, then jump to the lookahead.</p><label>Work date</label><input id="homeCalendarDate" type="date" onchange="syncHomeCalendar()" /><p class="hint" id="homeCalendarLabel">Showing today.</p><div class="actions"><button class="btn secondary" onclick="setTab('schedule')">Open schedule</button></div></div><div class="card solid"><div class="record-head"><h3>Projects</h3><span class="badge dark" id="activeProjectBadge">Craig Residence</span></div><p class="hint">Project cards should open that project workspace.</p><div class="project-grid" id="projectCards"></div></div></div>
+      </section>
+
+      <section class="panel" id="tab-schedule">
+        <div class="print-only"><h1>2-Week Lookahead</h1><p id="printProjectTitle">Project Lookahead</p></div>
+        <div class="section-head"><div><h2>2-Week Lookahead</h2><p>Simple view of Task_Status, LookAhead marks, Sequence_Additions, responsible trade, predecessors, and inspections.</p></div><div class="actions no-print"><button class="btn" onclick="printLookahead()">Print Lookahead</button><button class="btn secondary" onclick="document.getElementById('ganttCard').scrollIntoView({behavior:'smooth',block:'start'})">Gantt Chart</button></div></div>
+        <div class="workspace"><div class="card"><h3>Task control</h3><label>Pick lookahead week</label><input id="lookaheadDate" type="date" onchange="updateLookaheadDate(); renderMonthCalendar(); renderGanttChart();" /><p class="hint" id="lookaheadDateLabel">Showing current 2-week window.</p><div class="toolbar"><input id="taskSearch" oninput="renderTasks()" placeholder="Search task or company" /><select id="taskFilter" onchange="renderTasks()"><option value="">All</option><option>Scheduled</option><option>In Progress</option><option>Behind</option><option>Inspection</option><option>Done</option></select></div><div class="chips"><span class="chip">X Performed</span><span class="chip">/ Scheduled</span><span class="chip">0 Behind</span><span class="chip">! Inspection</span></div></div><div class="card solid"><div class="record-head"><h3>Tasks</h3><span class="badge dark" id="taskShown">0 shown</span></div><div class="list" id="taskList"></div></div></div>
+        <div class="card solid" id="monthCalendarCard" style="margin-top:14px;"><div class="record-head"><div><h3>Full Month Calendar</h3><p class="hint">Month view of the lookahead and field tasks.</p></div><div class="actions no-print"><button class="mini" onclick="changeCalendarMonth(-1)">← Prev</button><button class="mini primary" onclick="goCalendarToday()">Today</button><button class="mini" onclick="changeCalendarMonth(1)">Next →</button></div></div><h2 id="calendarMonthLabel" style="margin-top:6px;"></h2><div class="month-calendar" id="monthCalendar"></div></div>
+        <div class="card" id="ganttCard" style="margin-top:14px;"><div class="record-head"><div><h3>Gantt Chart</h3><p class="hint">14-day field sequence view for trades, blockers, and inspections.</p></div><span class="badge dark">2 weeks</span></div><div class="gantt" id="ganttChart"></div></div>
+      </section>
+
+      <section class="panel" id="tab-daily">
+        <div class="section-head"><div><h2>Daily Log</h2><p>Minimum viable daily report: weather, manpower, on-site companies, tomorrow, blockers, decisions.</p></div></div>
+        <div class="workspace"><div class="card"><h3>New daily report</h3><div class="three"><div><label>Date</label><input id="logDate" type="date" /></div><div><label>Weather</label><select id="weather"><option>Sunny</option><option>Cloudy</option><option>Rain</option><option>Storm delay</option></select></div><div><label>Headcount</label><input id="headcount" type="number" min="0" value="8" /></div></div><label>On-site companies</label><input id="onsite" list="companyOptions" placeholder="SBC, Castlerock…" /><label>Scheduled tomorrow</label><textarea id="tomorrow"></textarea><label>Blockers / decisions needed</label><textarea id="blockers"></textarea><div class="actions"><button class="btn" onclick="saveDailyLog()">Save daily log</button><button class="btn secondary" onclick="setTab('openitems')">Send to open items</button></div><div class="toast" id="dailyToast">Daily log saved.</div></div><div class="card solid"><h3>Recent activity</h3><div class="list" id="logList"></div></div></div>
+      </section>
+
+      <section class="panel" id="tab-openitems">
+        <div class="section-head"><div><h2>Open Items</h2><p>Selections, long-lead materials, field decisions, trade commitments, and cost-impact flags — the stuff that actually slows a custom home jobsite down.</p></div><button class="btn secondary" onclick="copyProgressSummary()">Copy Progress Summary</button></div>
+        <div class="workspace"><div class="card"><h3>Add field control item</h3><p class="hint">Use this for custom-home issues that need follow-up before they affect the schedule.</p><div class="two"><div><label>Type</label><select id="openType"><option>Selection</option><option>Long-lead material</option><option>Field decision</option><option>Trade commitment</option><option>Allowance risk</option><option>Change item</option><option>Inspection follow-up</option></select></div><div><label>Area / Room</label><input id="openArea" placeholder="Kitchen, Primary Bath, Exterior…" /></div></div><label>Item</label><input id="openTitle" placeholder="Cabinet shop drawings approval" /><div class="two"><div><label>Trade / Vendor</label><input id="openVendor" list="companyOptions" /></div><div><label>Needed by</label><input id="openDue" type="date" /></div></div><label>Next action</label><textarea id="openAction" placeholder="Who needs to do what next?"></textarea><div class="actions"><button class="btn" onclick="saveOpenItem()">Save open item</button><button class="btn secondary" onclick="setTab('documents')">Upload backup doc</button></div><div class="toast" id="openToast">Open item saved.</div><h3 style="margin-top:18px;">Trade lookup</h3><label>Search people / vendors</label><input id="partnerSearch" oninput="renderPartners()" placeholder="Company, trade, contact, phone, email" /><div class="two"><div><label>Trade</label><select id="tradeFilter" onchange="renderPartners()"><option value="">All trades</option></select></div><div><label>Status</label><select id="partnerStatusFilter" onchange="renderPartners()"><option value="">All statuses</option><option>Ready</option><option>Needs insurance</option><option>Need call back</option></select></div></div><h3 style="margin-top:18px;">Cost-impact flag</h3><div class="two"><div><label>Vendor</label><input id="costVendor" list="companyOptions" /></div><div><label>Type</label><select id="costType"><option>PO</option><option>Work Order</option><option>Contract</option><option>Change Order</option><option>Allowance</option><option>Invoice</option></select></div></div><div class="two"><div><label>Amount</label><input id="costAmount" type="number" min="0" step="0.01" /></div><div><label>Status</label><select id="costStatus"><option>Pending</option><option>Approved</option><option>Paid</option><option>Risk</option></select></div></div><label>Notes</label><textarea id="costNotes" placeholder="Field reason, scope note, or document reference."></textarea><div class="actions"><button class="btn secondary" onclick="saveCost()">Save cost flag</button></div><div class="toast" id="costToast">Cost flag saved.</div></div><div class="card solid"><div class="record-head"><h3>Open item board</h3><span class="badge dark" id="openShown">0 open</span></div><div class="focus-grid" id="openItemList"></div><h3 style="margin-top:18px;">Progress snapshot</h3><div class="focus-grid" id="progressSummary"></div><h3 style="margin-top:18px;">Priority contacts</h3><div class="list" id="partnerList"></div><h3 style="margin-top:18px;">Cost-impact flags</h3><div class="list" id="costList"></div><div class="toast" id="summaryToast">Copied.</div></div></div>
+      </section>
+
+      <section class="panel" id="tab-documents">
+        <div class="section-head"><div><h2>Documents</h2><p>Upload POs, work orders, and contracts now. Tag them by trade and phase so they can become the future estimating intelligence layer.</p></div></div>
+        <div class="workspace"><div class="card"><h3>Upload document memory</h3><p class="hint">This does not estimate yet. It organizes project documents so a future estimating tool can learn from real scopes, vendors, and costs.</p><label>Document file</label><input id="docFile" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg" /><div class="two"><div><label>Document type</label><select id="docType"><option>PO</option><option>Work Order</option><option>Contract</option><option>Change Order</option><option>Invoice</option><option>Selection Sheet</option></select></div><div><label>Trade / Vendor</label><input id="docVendor" list="companyOptions" /></div></div><div class="two"><div><label>Phase</label><select id="docPhase"><option>Sitework</option><option>Foundation</option><option>Shell</option><option>Roof Dry-In</option><option>MEP Rough</option><option>Insulation / Drywall</option><option>Interior Finishes</option><option>Exterior Finishes</option><option>Punch / Closeout</option></select></div><div><label>Amount if known</label><input id="docAmount" type="number" min="0" step="0.01" /></div></div><label>Scope keywords</label><input id="docTags" placeholder="windows, cabinets, tile, slab, framing…" /><div class="actions"><button class="btn" onclick="saveDocument()">Save document record</button></div><div class="toast" id="docToast">Document record saved.</div></div><div class="card solid"><div class="record-head"><h3>Document library</h3><span class="badge dark" id="docShown">0 docs</span></div><div class="list" id="docList"></div></div></div>
+      </section>
+
+      <section class="panel" id="tab-setup">
+        <div class="section-head"><div><h2>Setup</h2><p>Centralized once. No duplicate setup screens.</p></div></div>
+        <div class="card solid"><div class="two"><div><label>Project name</label><input id="projectName" value="Craig Residence" oninput="syncSetup()" /></div><div><label>Prepared by</label><select id="preparedBy" onchange="syncSetup()"><option>Superintendent</option><option>Project Manager</option></select></div></div><div class="two"><div><label>This week start</label><input id="weekStart" type="date" onchange="syncSetup()" /></div><div><label>Default sequence pack</label><select><option>House_NewConstruction</option><option>House_FullRemodel</option><option>House_PartialRemodel</option><option>House_BathRemodel</option><option>Condo_FullRemodel</option><option>Condo_PartialRemodel</option><option>Condo_BathRemodel</option></select></div></div><div class="two"><div><label>Optional progress summary email</label><input placeholder="pm@example.com" /></div><div><label>Automation hour</label><input type="number" min="0" max="23" value="6" /></div></div><label>Job description</label><textarea placeholder="Scope, jurisdiction notes, lot constraints, flood zone, building system…"></textarea></div>
+      </section>
+
+      <div class="footer-note">Standalone prototype. Saves demo notes/costs in this browser only. Existing site files were not modified.</div>
+    </main>
+  </div>
+
+  <nav class="mobile-tabs" id="mobileNav"></nav>
+  <datalist id="companyOptions"></datalist>
+
+  <script>
+    const tabs = [
+      { id: 'today', label: 'Today', icon: '🎯' },
+      { id: 'schedule', label: 'Schedule', icon: '📅' },
+      { id: 'daily', label: 'Log', icon: '📝' },
+      { id: 'openitems', label: 'Open Items', icon: '🏗️' },
+      { id: 'documents', label: 'Docs', icon: '📎' },
+      { id: 'setup', label: 'Setup', icon: '⚙️' }
+    ];
+
+    const state = {
+      active: 'today',
+      companies: [
+        { company: 'SBC', trade: 'Concrete / Shell', contact: 'Drock', phone: '239-922-7663', email: 'Drock@sbcflorida.com', status: 'Ready' },
+        { company: 'Wildcat Demolition', trade: 'Demolition', contact: 'Jay', phone: '239-841-3794', email: 'Jay@wildcatrenovation.com', status: 'Need call back' },
+        { company: 'Castlerock', trade: 'Masonry / Framing', contact: 'Bonita Builder', phone: '239-287-3859', email: 'Bonitabuilder1@gmail.com', status: 'Ready' },
+        { company: 'Advantage Plastering', trade: 'Stucco / Plaster', contact: 'Bob', phone: '239-825-0133', email: 'Bobs@advantagefour.com', status: 'Needs insurance' },
+        { company: 'Florida Install', trade: 'Windows / Doors', contact: 'Chad', phone: '239-645-1704', email: 'Chad@floridainstall.com', status: 'Ready' },
+        { company: 'Crown Roofing', trade: 'Roofing', contact: '', phone: '', email: '', status: 'Need call back' },
+        { company: 'Windemuller Lightning Protection', trade: 'Lightning Protection', contact: '', phone: '941-650-7327', email: '', status: 'Ready' }
+      ],
+      tasks: [
+        { name: 'Door Frame Setup', company: 'Florida Install', status: 'In Progress', mark: '/', progress: 42, date: 'This week', inspection: false },
+        { name: 'Masonry inspection prep', company: 'Castlerock', status: 'Inspection', mark: '!', progress: 64, date: 'Tomorrow', inspection: true },
+        { name: 'Stucco insurance verification', company: 'Advantage Plastering', status: 'Behind', mark: '0', progress: 18, date: 'Today', inspection: false },
+        { name: 'Concrete punch list', company: 'SBC', status: 'Scheduled', mark: '/', progress: 25, date: 'Next week', inspection: false },
+        { name: 'Roof dry-in coordination', company: 'Crown Roofing', status: 'Scheduled', mark: '/', progress: 10, date: 'Next week', inspection: false }
+      ],
+      logs: JSON.parse(localStorage.getItem('pl_crm_logs_v2') || '[]'),
+      costs: JSON.parse(localStorage.getItem('pl_crm_costs_v2') || '[{"vendor":"Florida Install","type":"PO","amount":4879,"status":"Pending","notes":"Door package install allowance."},{"vendor":"Advantage Plastering","type":"Insurance risk","amount":2876,"status":"Risk","notes":"Hold scheduling until insurance date is verified."}]'),
+      openItems: JSON.parse(localStorage.getItem('pl_crm_open_items_v1') || '[{"type":"Selection","area":"Kitchen","title":"Cabinet hardware approval","vendor":"Designer / Client","due":"","action":"Confirm finish and quantity before cabinet install.","status":"Needs decision"},{"type":"Long-lead material","area":"Exterior","title":"Window delivery confirmation","vendor":"Florida Install","due":"","action":"Confirm delivery window and staging requirements.","status":"At risk"},{"type":"Inspection follow-up","area":"Shell","title":"Masonry inspection prep","vendor":"Castlerock","due":"","action":"Verify corrections before reinspection.","status":"Open"}]'),
+      documents: JSON.parse(localStorage.getItem('pl_crm_documents_v1') || '[]'),
+      activeProject: localStorage.getItem('pl_crm_active_project') || 'Craig Residence',
+      projects: [
+        { name: 'Craig Residence', phase: 'Shell / Dry-In', location: 'SWFL', status: 'Active', open: 5 },
+        { name: 'Guest Cabana', phase: 'Interior Finishes', location: 'SWFL', status: 'Active', open: 3 },
+        { name: 'Palm Estate', phase: 'Selections', location: 'Naples', status: 'Precon', open: 7 },
+        { name: 'Harbor Remodel', phase: 'Punch / Closeout', location: 'Bonita Springs', status: 'Closeout', open: 2 }
+      ]
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (value) => String(value ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    let calendarCursor = new Date();
+
+    function mondayString(date = new Date()) {
+      const d = new Date(date); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); d.setDate(diff);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function buildNav() {
+      const navHtml = tabs.map(t => `<button class="tab ${t.id === state.active ? 'active' : ''}" data-tab="${t.id}" onclick="setTab('${t.id}')"><span class="ico">${t.icon}</span><span>${t.label}</span><span class="count" id="count-${t.id}">0</span></button>`).join('');
+      $('desktopNav').innerHTML = navHtml;
+      $('mobileNav').innerHTML = navHtml;
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem('pl_crm_theme', theme);
+      const btn = $('themeToggle');
+      if (btn) btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+
+    function toggleTheme() {
+      applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    function setTab(id) {
+      state.active = id;
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `tab-${id}`));
+      const panel = $(`tab-${id}`);
+      if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function counts() {
+      const risk = state.tasks.filter(t => ['Behind','Inspection'].includes(t.status)).length + state.logs.filter(l => l.type === 'Decision needed').length + state.openItems.filter(i => ['At risk','Needs decision'].includes(i.status)).length;
+      return { today: risk + 1, schedule: state.tasks.filter(t => t.status !== 'Done').length, daily: state.logs.length, openitems: state.openItems.length, documents: state.documents.length, setup: 1 };
+    }
+
+    function updateNavCounts() {
+      const c = counts();
+      Object.entries(c).forEach(([key, value]) => document.querySelectorAll(`#count-${key}`).forEach(el => el.textContent = value));
+    }
+
+    function renderMetrics() {
+      const risk = state.tasks.filter(t => ['Behind','Inspection'].includes(t.status)).length + state.logs.filter(l => l.type === 'Decision needed').length;
+      $('openTaskCount').textContent = state.tasks.filter(t => t.status !== 'Done').length;
+      $('companyCount').textContent = state.companies.length;
+      $('decisionCount').textContent = risk;
+      $('heroRiskCount').textContent = risk;
+      $('heroRiskText').textContent = risk === 1 ? 'Item needs attention before it drifts.' : 'Items need decisions, inspections, or follow-up.';
+      $('costTotal').textContent = '$' + state.costs.reduce((sum, c) => sum + Number(c.amount || 0), 0).toLocaleString();
+    }
+
+    function renderOptions() {
+      $('companyOptions').innerHTML = state.companies.map(c => `<option value="${esc(c.company)}"></option>`).join('');
+      const trades = [...new Set(state.companies.map(c => c.trade))].sort();
+      $('tradeFilter').innerHTML = '<option value="">All trades</option>' + trades.map(t => `<option>${esc(t)}</option>`).join('');
+    }
+
+    function badgeClass(status) {
+      if (['Ready','Done','Approved','Paid'].includes(status)) return 'green';
+      if (['Inspection','Pending'].includes(status)) return 'blue';
+      if (['Behind','Needs insurance','Need call back','Risk','At risk','Needs decision'].includes(status)) return 'red';
+      return '';
+    }
+
+    function renderFocus() {
+      const items = [
+        ['Call Advantage Plastering', 'Insurance expiration needs verification before scheduling.', 'Need call', 'red', ''],
+        ['Confirm masonry inspection', 'Castlerock task is marked ! and should not drift.', 'Inspection', 'blue', 'blue'],
+        ['Clear custom-home selections', 'Cabinet hardware and window delivery are open items that can affect the lookahead.', 'Open items', 'green', 'green']
+      ];
+      $('focusList').innerHTML = items.map(([title, meta, tag, badge, pulse]) => `<div class="focus"><span class="pulse ${pulse}"></span><div><strong>${esc(title)}</strong><div class="meta">${esc(meta)}</div></div><span class="badge ${badge}">${esc(tag)}</span></div>`).join('');
+    }
+
+    function renderTodayHome() {
+      const openTasks = state.tasks.filter(t => t.status !== 'Done').slice(0, 4);
+      $('todayTaskCount').textContent = `${openTasks.length} open`;
+      $('todayTaskList').innerHTML = openTasks.length ? openTasks.map(t => `<article class="record tint-blue"><div class="record-head"><div><div class="title">${esc(t.name)}</div><div class="meta">${esc(t.company)} · ${esc(t.date)} · ${esc(t.status)}</div></div><span class="badge ${badgeClass(t.status)}">${esc(t.mark)}</span></div><div class="actions"><button class="mini primary" onclick="setTab('schedule')">Open schedule</button><button class="mini" onclick="quickFill('${esc(t.company)}')">Add note</button></div></article>`).join('') : '<div class="empty">No open tasks for today.</div>';
+
+      const latest = state.logs[0];
+      $('todayLogPreview').innerHTML = latest ? `<div class="focus"><span class="pulse blue"></span><div><strong>${esc(latest.type || 'Daily note')}</strong><div class="meta">${esc(latest.date)} · ${esc(latest.note)}</div></div><span class="badge blue">Latest</span></div>` : '<div class="empty">No daily log yet. Add the first field note.</div>';
+
+      $('activeProjectBadge').textContent = state.activeProject;
+      $('projectCards').innerHTML = state.projects.map(p => `<article class="project-card ${p.name === state.activeProject ? 'active' : ''}" onclick="setActiveProject('${esc(p.name)}')"><div class="record-head"><div><div class="title">${esc(p.name)}</div><div class="meta">${esc(p.location)} · ${esc(p.phase)}</div></div><span class="badge ${p.status === 'Active' ? 'green' : p.status === 'Closeout' ? 'blue' : 'amber'}">${esc(p.status)}</span></div><div class="meta" style="margin-top:10px;">${p.open} open field items</div></article>`).join('');
+    }
+
+    function setActiveProject(name) {
+      state.activeProject = name;
+      localStorage.setItem('pl_crm_active_project', name);
+      renderTodayHome();
+      setTab('schedule');
+    }
+
+    function renderOpenItems() {
+      $('openShown').textContent = `${state.openItems.length} open`;
+      $('openItemList').innerHTML = state.openItems.length ? state.openItems.map(item => `<div class="focus"><span class="pulse ${item.status === 'At risk' ? '' : 'blue'}"></span><div><strong>${esc(item.title)}</strong><div class="meta">${esc(item.type)} · ${esc(item.area || 'Whole project')} · ${esc(item.vendor || 'Unassigned')}${item.due ? ' · Needed ' + esc(item.due) : ''}</div><div class="meta">${esc(item.action || 'No next action entered.')}</div></div><span class="badge ${badgeClass(item.status)}">${esc(item.status)}</span></div>`).join('') : '<div class="empty">No open items. Add selections, long-leads, field decisions, or trade commitments here.</div>';
+    }
+
+    function renderPartners() {
+      const q = $('partnerSearch').value.toLowerCase(); const trade = $('tradeFilter').value; const status = $('partnerStatusFilter').value;
+      const rows = state.companies.filter(c => (!trade || c.trade === trade) && (!status || c.status === status) && [c.company,c.trade,c.contact,c.phone,c.email].join(' ').toLowerCase().includes(q));
+      const partnerShown = $('partnerShown');
+      if (partnerShown) partnerShown.textContent = `${rows.length} shown`;
+      $('partnerList').innerHTML = rows.length ? rows.map((c, i) => `<article class="record ${['tint-orange','tint-blue','tint-pink'][i % 3]}"><div class="record-head"><div><div class="title">${esc(c.company)}</div><div class="meta">${esc(c.trade)} · ${esc(c.contact || 'Contact TBD')}</div></div><span class="badge ${badgeClass(c.status)}">${esc(c.status)}</span></div><div class="meta">${esc(c.phone || 'No phone')} · ${esc(c.email || 'No email')}</div><div class="actions"><button class="mini primary" onclick="quickFill('${esc(c.company)}')">Add note</button><button class="mini">Call</button><button class="mini">Email</button></div></article>`).join('') : '<div class="empty">No matching subcontractors.</div>';
+    }
+
+    function renderTasks() {
+      const q = $('taskSearch').value.toLowerCase(); const f = $('taskFilter').value;
+      const rows = state.tasks.filter(t => (!f || t.status === f) && [t.name,t.company,t.status].join(' ').toLowerCase().includes(q));
+      $('taskShown').textContent = `${rows.length} shown`;
+      $('taskList').innerHTML = rows.length ? rows.map((t, i) => `<article class="record"><div class="record-head"><div><div class="title">${esc(t.name)}</div><div class="meta">${esc(t.company)} · ${esc(t.date)} · LookAhead mark ${esc(t.mark)}</div></div><span class="badge ${badgeClass(t.status)}">${esc(t.status)}</span></div><div class="progress"><div class="bar" style="--w:${t.progress}%"></div></div><div class="actions"><button class="mini primary" onclick="markDone('${esc(t.name)}')">Mark X performed</button><button class="mini" onclick="quickFill('${esc(t.company)}')">Call trade</button></div></article>`).join('') : '<div class="empty">No matching tasks.</div>';
+    }
+
+    function lookaheadStartDate() {
+      const value = $('lookaheadDate')?.value;
+      const base = value ? new Date(value + 'T00:00:00') : new Date();
+      base.setHours(0,0,0,0);
+      return base;
+    }
+
+    function taskStartDate(task, index = 0) {
+      const base = lookaheadStartDate();
+      const label = String(task.date || '').toLowerCase();
+      const d = new Date(base);
+      if (label.includes('today')) return d;
+      if (label.includes('tomorrow')) { d.setDate(d.getDate() + 1); return d; }
+      if (label.includes('next week')) { d.setDate(d.getDate() + 7 + index); return d; }
+      if (label.includes('this week')) { d.setDate(d.getDate() + Math.min(index, 5)); return d; }
+      d.setDate(d.getDate() + index);
+      return d;
+    }
+
+    function sameDay(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    function isoDate(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function renderMonthCalendar() {
+      const grid = $('monthCalendar');
+      if (!grid) return;
+      const year = calendarCursor.getFullYear();
+      const month = calendarCursor.getMonth();
+      $('calendarMonthLabel').textContent = calendarCursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+      const first = new Date(year, month, 1);
+      const start = new Date(first);
+      start.setDate(first.getDate() - first.getDay());
+      const today = new Date(); today.setHours(0,0,0,0);
+      let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div class="day-head">${d}</div>`).join('');
+      for (let i = 0; i < 42; i++) {
+        const day = new Date(start);
+        day.setDate(start.getDate() + i);
+        const events = state.tasks.map((t, idx) => ({ task: t, date: taskStartDate(t, idx) })).filter(x => sameDay(x.date, day)).slice(0, 3);
+        html += `<button class="day-cell ${day.getMonth() !== month ? 'muted' : ''} ${sameDay(day, today) ? 'today' : ''}" onclick="selectCalendarDay('${isoDate(day)}')"><span class="day-num">${day.getDate()}</span>${events.map(x => `<span class="cal-event">${esc(x.task.company)} · ${esc(x.task.name)}</span>`).join('')}</button>`;
+      }
+      grid.innerHTML = html;
+    }
+
+    function changeCalendarMonth(delta) {
+      calendarCursor.setMonth(calendarCursor.getMonth() + delta);
+      renderMonthCalendar();
+    }
+
+    function goCalendarToday() {
+      calendarCursor = new Date();
+      $('lookaheadDate').valueAsDate = new Date();
+      updateLookaheadDate();
+      renderMonthCalendar();
+      renderGanttChart();
+    }
+
+    function selectCalendarDay(dateStr) {
+      $('lookaheadDate').value = dateStr;
+      updateLookaheadDate();
+      renderGanttChart();
+    }
+
+    function renderGanttChart() {
+      const gantt = $('ganttChart');
+      if (!gantt) return;
+      const base = lookaheadStartDate();
+      const days = Array.from({ length: 14 }, (_, i) => { const d = new Date(base); d.setDate(base.getDate() + i); return d; });
+      const header = `<div class="gantt-row"><div class="gantt-label">Trade / task</div>${days.map(d => `<div class="gantt-day">${d.toLocaleDateString(undefined,{weekday:'short'})}<br>${d.getMonth()+1}/${d.getDate()}</div>`).join('')}</div>`;
+      const rows = state.tasks.map((t, idx) => {
+        const start = taskStartDate(t, idx);
+        const duration = Math.max(1, Math.ceil((Number(t.progress || 10) / 100) * 4));
+        return `<div class="gantt-row"><div class="gantt-label">${esc(t.company)}<br><span class="meta">${esc(t.name)}</span></div>${days.map(d => {
+          const diff = Math.round((d - start) / 86400000);
+          return `<div class="gantt-cell ${diff >= 0 && diff < duration ? 'active' : ''}" title="${esc(t.name)}"></div>`;
+        }).join('')}</div>`;
+      }).join('');
+      gantt.innerHTML = header + rows;
+    }
+
+    function printLookahead() {
+      $('printProjectTitle').textContent = `${state.activeProject} · Starting ${lookaheadStartDate().toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}`;
+      renderMonthCalendar();
+      renderGanttChart();
+      window.print();
+    }
+
+    function renderLogs() {
+      $('logList').innerHTML = state.logs.length ? state.logs.slice(0, 10).map(l => `<article class="record tint-blue"><div class="record-head"><div><div class="title">${esc(l.type || 'Note')}</div><div class="meta">${esc(l.date)} · ${esc(l.company || 'General')}</div></div><span class="badge blue">Log</span></div><p class="meta">${esc(l.note)}</p></article>`).join('') : '<div class="empty">No logs yet. Use Quick Capture or Daily Log.</div>';
+    }
+
+    function renderCosts() {
+      $('costList').innerHTML = state.costs.length ? state.costs.map(c => `<article class="record tint-pink"><div class="record-head"><div><div class="title">${esc(c.vendor || 'Vendor TBD')}</div><div class="meta">${esc(c.type)} · ${esc(c.notes || 'No notes')}</div></div><span class="badge ${badgeClass(c.status)}">${esc(c.status)}</span></div><strong style="font-size:32px;display:block;margin-top:12px;letter-spacing:-.06em;">$${Number(c.amount || 0).toLocaleString()}</strong></article>`).join('') : '<div class="empty">No cost records.</div>';
+    }
+
+    function renderProgressSummary() {
+      const behind = state.tasks.filter(t => t.status === 'Behind').map(t => t.name).join(', ') || 'No behind tasks.';
+      const inspect = state.tasks.filter(t => t.inspection).map(t => t.name).join(', ') || 'No inspection milestones.';
+      const lastLog = state.logs[0]?.note || 'No daily log entered yet.';
+      const open = state.openItems.filter(i => ['At risk','Needs decision'].includes(i.status)).map(i => i.title).join(', ') || 'No critical open items.';
+      const rows = [['Schedule', `${state.tasks.filter(t => t.status !== 'Done').length} open tasks in the two-week window.`], ['Open items', open], ['Risks', behind], ['Inspections', inspect], ['Latest field note', lastLog], ['Cost flags', `$${state.costs.reduce((s,c)=>s+Number(c.amount||0),0).toLocaleString()} tracked as field cost-impact flags.`]];
+      $('progressSummary').innerHTML = rows.map(([title, meta]) => `<div class="focus"><span class="pulse"></span><div><strong>${esc(title)}</strong><div class="meta">${esc(meta)}</div></div><span class="badge">Ready</span></div>`).join('');
+    }
+
+    function handleGlobalSearch() {
+      const q = $('globalSearch').value.trim();
+      if (!q) return;
+      $('partnerSearch').value = q; $('taskSearch').value = q;
+      renderPartners(); renderTasks();
+      const hasCompany = state.companies.some(c => [c.company,c.trade,c.contact].join(' ').toLowerCase().includes(q.toLowerCase()));
+      setTab(hasCompany ? 'openitems' : 'schedule');
+    }
+
+    function saveQuickNote() {
+      const note = $('quickNote').value.trim(); if (!note) return;
+      state.logs.unshift({ type: $('quickType').value, company: $('quickCompany').value, note, date: new Date().toLocaleString() });
+      localStorage.setItem('pl_crm_logs_v2', JSON.stringify(state.logs)); clearQuickNote(); show('quickToast'); renderAll();
+    }
+    function clearQuickNote() { $('quickNote').value = ''; $('quickCompany').value = ''; }
+    function focusDailyLog() { setTimeout(() => $('blockers').focus(), 120); }
+    function focusQuickNote() { focusDailyLog(); }
+    function quickFill(company) { setTab('daily'); $('onsite').value = company; $('blockers').value = $('blockers').value ? `${$('blockers').value}\nFollow up with ${company}.` : `Follow up with ${company}.`; focusDailyLog(); }
+    function markDone(name) { const task = state.tasks.find(t => t.name === name); if (task) { task.status = 'Done'; task.progress = 100; task.mark = 'X'; renderAll(); } }
+    function saveDailyLog() {
+      const note = `Weather: ${$('weather').value}. Headcount: ${$('headcount').value}. On site: ${$('onsite').value || 'TBD'}. Tomorrow: ${$('tomorrow').value || 'TBD'}. Blockers: ${$('blockers').value || 'None listed'}.`;
+      state.logs.unshift({ type: 'Daily report', company: $('onsite').value, note, date: $('logDate').value || new Date().toLocaleDateString() });
+      localStorage.setItem('pl_crm_logs_v2', JSON.stringify(state.logs)); show('dailyToast'); renderAll();
+    }
+    function saveCost() {
+      state.costs.unshift({ vendor: $('costVendor').value, type: $('costType').value, amount: Number($('costAmount').value || 0), status: $('costStatus').value, notes: $('costNotes').value });
+      localStorage.setItem('pl_crm_costs_v2', JSON.stringify(state.costs)); $('costVendor').value = $('costAmount').value = $('costNotes').value = ''; show('costToast'); renderAll();
+    }
+    function saveOpenItem() {
+      const title = $('openTitle').value.trim(); if (!title) return;
+      state.openItems.unshift({ type: $('openType').value, area: $('openArea').value, title, vendor: $('openVendor').value, due: $('openDue').value, action: $('openAction').value, status: $('openType').value === 'Selection' || $('openType').value === 'Field decision' ? 'Needs decision' : 'Open' });
+      localStorage.setItem('pl_crm_open_items_v1', JSON.stringify(state.openItems));
+      $('openTitle').value = $('openArea').value = $('openVendor').value = $('openDue').value = $('openAction').value = ''; show('openToast'); renderAll();
+    }
+    function copyProgressSummary() {
+      const text = [...document.querySelectorAll('#progressSummary .focus')].map(el => el.innerText.replace(/\nReady$/, '')).join('\n');
+      navigator.clipboard?.writeText(text); show('summaryToast');
+    }
+    function saveDocument() {
+      const file = $('docFile').files && $('docFile').files[0];
+      const name = file ? file.name : `${$('docType').value} record`;
+      state.documents.unshift({ name, type: $('docType').value, vendor: $('docVendor').value, phase: $('docPhase').value, amount: Number($('docAmount').value || 0), tags: $('docTags').value, date: new Date().toLocaleDateString() });
+      localStorage.setItem('pl_crm_documents_v1', JSON.stringify(state.documents));
+      $('docFile').value = $('docVendor').value = $('docAmount').value = $('docTags').value = ''; show('docToast'); renderAll();
+    }
+    function renderDocuments() {
+      $('docShown').textContent = `${state.documents.length} docs`;
+      $('docList').innerHTML = state.documents.length ? state.documents.map(doc => `<article class="record tint-blue"><div class="record-head"><div><div class="title">${esc(doc.name)}</div><div class="meta">${esc(doc.type)} · ${esc(doc.phase)} · ${esc(doc.vendor || 'Vendor TBD')}</div><div class="meta">${esc(doc.tags || 'No scope tags')} ${doc.amount ? '· $' + Number(doc.amount).toLocaleString() : ''}</div></div><span class="badge blue">Saved</span></div></article>`).join('') : '<div class="empty">No documents yet. Add POs, work orders, contracts, change orders, and selection sheets here.</div>';
+    }
+    function updateLookaheadDate() {
+      const value = $('lookaheadDate').value;
+      $('lookaheadDateLabel').textContent = value ? `Showing lookahead window starting ${new Date(value + 'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}.` : 'Showing current 2-week window.';
+      if (value) calendarCursor = new Date(value + 'T00:00:00');
+    }
+    function syncHomeCalendar() {
+      const value = $('homeCalendarDate').value;
+      $('homeCalendarLabel').textContent = value ? `Work date selected: ${new Date(value + 'T00:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}.` : 'Showing today.';
+      if (value) {
+        $('lookaheadDate').value = value;
+        updateLookaheadDate();
+      }
+    }
+    function show(id) { const el = $(id); el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 1800); }
+    function syncSetup() {
+      $('sideWeek').textContent = $('weekStart').value ? new Date($('weekStart').value + 'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : mondayString();
+    }
+    function renderAll() { renderMetrics(); updateNavCounts(); renderFocus(); renderTodayHome(); renderOpenItems(); renderPartners(); renderTasks(); renderLogs(); renderCosts(); renderProgressSummary(); renderDocuments(); renderMonthCalendar(); renderGanttChart(); }
+
+    applyTheme('dark');
+    buildNav();
+    $('logDate').valueAsDate = new Date();
+    $('weekStart').valueAsDate = new Date();
+    $('lookaheadDate').valueAsDate = new Date();
+    $('homeCalendarDate').valueAsDate = new Date();
+    syncHomeCalendar();
+    updateLookaheadDate();
+    syncSetup(); renderOptions(); renderAll();
+  </script>
+</body>
+</html>

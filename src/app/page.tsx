@@ -1,74 +1,88 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { CreateProjectForm } from "@/components/create-project-form";
+import { Activity, Zap, ChevronRight, LayoutGrid } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  let projects: Array<{ id: string; name: string; thisWeekStart: Date; structureType: string; scopeType: string }> = [];
+  let projects: Array<{ id: string; name: string; status: string; location?: string | null }> = [];
   let loadError: string | null = null;
 
   try {
     projects = await prisma.project.findMany({
       orderBy: { updatedAt: "desc" },
-      select: { id: true, name: true, thisWeekStart: true, structureType: true, scopeType: true },
-      take: 20,
+      select: { id: true, name: true, status: true, location: true },
+      take: 10,
     });
   } catch (error) {
-    loadError = `Unable to load projects: ${(error as Error).message}`;
+    loadError = "Operational connection lost.";
   }
 
   return (
-    <main className="app-shell">
-      <div className="app-wrap space-y-5">
-        <section className="app-card hero-pop p-6">
-          <p className="pill inline-block mb-3">Superintendent Command Center</p>
-          <h1 className="app-title text-4xl">Project Report Web Assistant</h1>
-          <p className="mt-2 text-sm">Create a project, import real workbook data, and open the project workspace from one list.</p>
-        </section>
+    <div className="flex flex-col min-h-screen">
+      <header className="tma-header">
+        <p className="text-[10px] font-black text-primary tracking-[0.2em] mb-1">COMMAND CENTER</p>
+        <h1 className="text-3xl font-black tracking-tight text-ink">Mission Control</h1>
+      </header>
 
-        <CreateProjectForm />
-
-        <section className="app-card p-4 table-scroll">
-          <div className="section-toolbar">
-            <h2 className="app-title text-2xl section-heading">Projects</h2>
-            <Link href="/dashboard" className="btn btn-secondary">Portfolio</Link>
+      <div className="px-6 py-6 space-y-6">
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-[12px] font-black text-slate-500 uppercase tracking-widest">Active Missions</h2>
+            <Link href="/dashboard" className="text-[10px] font-black text-primary uppercase">Portfolio</Link>
           </div>
-          {loadError ? (
-            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+
+          {loadError && (
+            <div className="tma-card border-red-500/20 bg-red-500/5 text-red-400 text-xs font-bold text-center">
               {loadError}
             </div>
-          ) : null}
-          <table>
-            <thead>
-              <tr>
-                <th>Project</th>
-                <th>Type</th>
-                <th>This Week Start</th>
-                <th>Open</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.length ? projects.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.name}</td>
-                  <td>{p.structureType} / {p.scopeType}</td>
-                  <td>{p.thisWeekStart.toISOString().slice(0, 10)}</td>
-                  <td>
-                    <div className="action-row">
-                      <Link href={`/projects/${p.id}`} className="btn btn-primary">Open</Link>
+          )}
+
+          <div className="space-y-3">
+            {projects.length ? projects.map((p) => (
+              <Link key={p.id} href={`/projects/${p.id}`} className="block active:scale-[0.98] transition-transform">
+                <div className="tma-card hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-[16px] bg-primary/10 flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-primary" />
                     </div>
-                  </td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan={4}>No projects found. Create a project or import a workbook to begin.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-black text-ink uppercase tracking-wide truncate">{p.name}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{p.status || 'Active'}</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-600" />
+                  </div>
+                </div>
+              </Link>
+            )) : (
+              <div className="tma-card border-dashed flex flex-col items-center justify-center py-12 text-center">
+                <LayoutGrid className="w-12 h-12 text-slate-800 mb-4" strokeWidth={1} />
+                <p className="text-ink font-black uppercase text-sm tracking-wide">Zero Active Missions</p>
+                <p className="text-slate-500 text-xs mt-2 px-8">Deploy a project sequence in Notion to populate this field list.</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="pt-4">
+          <div className="px-2 mb-4">
+            <h2 className="text-[12px] font-black text-slate-500 uppercase tracking-widest">Deploy New Mission</h2>
+          </div>
+          <div className="tma-card bg-white/[0.03]">
+            <CreateProjectForm />
+          </div>
         </section>
       </div>
-    </main>
+
+      <footer className="mt-auto py-12 px-6 text-center">
+        <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.3em]">
+          Protected by Bespoke Services Intelligence
+        </p>
+      </footer>
+    </div>
   );
 }

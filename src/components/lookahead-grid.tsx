@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
+import * as amplitude from "@amplitude/unified";
 
 type MatrixRow = {
   taskId: string;
@@ -62,7 +63,6 @@ export function LookaheadGrid({ projectId, rows }: { projectId: string; rows: Ma
       setActivePhase("");
       return;
     }
-
     if (!grouped.some(([phase]) => phase === activePhase)) {
       setActivePhase(grouped[0][0]);
     }
@@ -87,6 +87,12 @@ export function LookaheadGrid({ projectId, rows }: { projectId: string; rows: Ma
         throw new Error(data.error || "Failed to save lookahead mark");
       }
       const timestamp = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      amplitude.track("Lookahead Mark Saved", {
+        project_id: projectId,
+        task_id: taskId,
+        date,
+        symbol: symbol || "cleared",
+      });
       setSavedAt(timestamp);
       setMessage(symbol ? `Lookahead updated at ${timestamp}.` : `Lookahead mark cleared at ${timestamp}.`);
     } catch (error) {
@@ -98,20 +104,20 @@ export function LookaheadGrid({ projectId, rows }: { projectId: string; rows: Ma
   }
 
   return (
-    <div className="lookahead-workflow">
-      <section className="lookahead-control-panel">
-        <div className="lookahead-status-copy">
+    <div className="tma-lookahead">
+      <section className="tma-lookahead-controls">
+        <div className="tma-lookahead-status">
           <span>{grouped.length} phases</span>
           <p>{message || "Pick a mark, then tap the dates that need it. Every tap saves immediately."}</p>
           {savedAt ? <strong>Last save {savedAt}</strong> : null}
         </div>
 
-        <div className="mark-palette" aria-label="Lookahead mark palette">
+        <div className="tma-mark-palette" aria-label="Lookahead mark palette">
           {symbolOptions.map((option) => (
             <button
               key={option.label}
               type="button"
-              className={selectedSymbol === option.value ? "mark-choice active" : "mark-choice"}
+              className={selectedSymbol === option.value ? "tma-mark-choice tma-mark-choice-active" : "tma-mark-choice"}
               onClick={() => setSelectedSymbol(option.value)}
             >
               <span>{option.short}</span>
@@ -121,14 +127,14 @@ export function LookaheadGrid({ projectId, rows }: { projectId: string; rows: Ma
         </div>
       </section>
 
-      <section className="phase-navigator" aria-label="Project phases">
+      <section className="tma-phase-nav" aria-label="Project phases">
         {grouped.map(([phase, phaseRows], index) => {
           const marked = phaseRows.reduce((count, row) => count + row.days.filter((day) => marks.get(`${row.taskId}|${day.date}`)).length, 0);
           return (
             <button
               key={phase}
               type="button"
-              className={phase === activePhaseName ? "phase-tab active" : "phase-tab"}
+              className={phase === activePhaseName ? "tma-phase-tab-active" : "tma-phase-tab"}
               onClick={() => setActivePhase(phase)}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
@@ -139,14 +145,14 @@ export function LookaheadGrid({ projectId, rows }: { projectId: string; rows: Ma
         })}
       </section>
 
-      <section className="phase-board">
-        <div className="phase-board-header">
+      <section className="tma-phase-board">
+        <div className="tma-phase-board-header">
           <div>
             <span>Phase {activePhaseIndex + 1} of {grouped.length}</span>
             <h2>{activePhaseName}</h2>
             <p>{activeRows.length} task(s), {phaseMarkedCount} active date mark(s).</p>
           </div>
-          <div className="phase-stepper">
+          <div className="tma-phase-stepper">
             <button
               type="button"
               disabled={activePhaseIndex <= 0}
@@ -164,19 +170,19 @@ export function LookaheadGrid({ projectId, rows }: { projectId: string; rows: Ma
           </div>
         </div>
 
-        <div className="lookahead-grid-scroll">
-          <div className="lookahead-date-grid" style={{ "--day-count": dates.length } as CSSProperties}>
-            <div className="grid-corner">Task / Company</div>
+        <div className="tma-lookahead-grid-scroll">
+          <div className="tma-lookahead-date-grid" style={{ "--day-count": dates.length } as CSSProperties}>
+            <div className="tma-grid-corner">Task / Company</div>
             {dates.map((day) => (
-              <div key={day.date} className="date-heading">
+              <div key={day.date} className="tma-date-heading">
                 <strong>{day.label.split(" ")[0]}</strong>
                 <span>{day.label.split(" ")[1]}</span>
               </div>
             ))}
 
             {activeRows.map((row) => (
-              <div key={row.taskId} className="lookahead-row">
-                <div className="task-anchor">
+              <div key={row.taskId} className="tma-lookahead-row">
+                <div className="tma-task-anchor">
                   <strong>{row.taskName}</strong>
                   <span>{row.ownerCompany}</span>
                   <small>{row.taskId}{row.trade ? ` / ${row.trade}` : ""}</small>
@@ -192,7 +198,7 @@ export function LookaheadGrid({ projectId, rows }: { projectId: string; rows: Ma
                     <button
                       key={key}
                       type="button"
-                      className={symbol ? `lookahead-cell marked mark-${symbolClass(symbol)}` : "lookahead-cell"}
+                      className={symbol ? `tma-lookahead-cell tma-lookahead-cell-marked tma-lookahead-cell-${symbolClass(symbol)}` : "tma-lookahead-cell"}
                       disabled={busy}
                       onClick={() => save(row.taskId, day.date, selectedSymbol)}
                       title={`${row.taskName} ${day.label}: ${activeOption?.label ?? "No mark"}`}

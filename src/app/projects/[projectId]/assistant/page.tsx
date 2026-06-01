@@ -48,29 +48,34 @@ export default async function AssistantPage({ params }: { params: Promise<{ proj
   });
 
   return (
-    <main className="app-shell">
-      <div className="app-wrap space-y-4">
-        <section className="app-card p-6">
-          <h1 className="app-title text-3xl">Assistant Operations Console</h1>
-          <p className="text-sm text-slate-600">Daily actions: update status truth, track inspections, and keep partner contact network complete.</p>
-          <div className="action-row mt-3">
-            <Link href={`/projects/${projectId}`} className="btn btn-secondary">Back to Project</Link>
-          </div>
-        </section>
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+      <header className="tma-header">
+        <h1 className="text-2xl font-black tracking-tight text-ink">Operations Console</h1>
+        <p className="text-sm text-ink-muted mt-1">Update status truth, track inspections, and manage partners.</p>
+        <div className="mt-3">
+          <Link className="tma-button-secondary text-[0.65rem] py-2 px-4" href={`/projects/${projectId}`}>
+            Back to Project
+          </Link>
+        </div>
+      </header>
 
-        <section className="app-card p-4">
-          <h2 className="app-title text-2xl">Top Priorities</h2>
-          <ul className="list-disc pl-5 mt-2 text-sm">
-            {summary.assistantActions.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ul>
-        </section>
+      <section className="tma-card">
+        <h2 className="tma-section-title">Top Priorities</h2>
+        <div className="space-y-2">
+          {summary.assistantActions.map((a) => (
+            <div key={a} className="tma-card-inner text-sm text-ink-dim">
+              {a}
+            </div>
+          ))}
+          {!summary.assistantActions.length && (
+            <p className="text-ink-muted text-sm">No priority actions right now.</p>
+          )}
+        </div>
+      </section>
 
-        <TemplateApplier projectId={projectId} />
-        <StatusBoard projectId={projectId} rows={statusRows} />
-        <PartnersManager companies={companies} />
-      </div>
-    </main>
+      <TemplateApplier projectId={projectId} />
+      <StatusBoard projectId={projectId} rows={statusRows} />
+      <PartnersManager companies={companies} />
+    </div>
   );
 }
