@@ -5,13 +5,36 @@ import { prisma } from "@/lib/prisma";
 const statusSchema = z.object({
   taskId: z.string().min(1),
   status: z.string().min(1),
-  confirmedComplete: z.boolean(),
-  inspectionRequired: z.boolean(),
-  inspectionPassed: z.boolean(),
+  confirmedComplete: z.boolean().default(false),
+  inspectionRequired: z.boolean().default(false),
+  inspectionPassed: z.boolean().default(false),
   lastUpdated: z.string().optional(),
 });
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
+
+  try {
+    const statuses = await prisma.taskStatus.findMany({
+      where: { projectId },
+      select: {
+        taskId: true,
+        status: true,
+        confirmedComplete: true,
+        inspectionRequired: true,
+        inspectionPassed: true,
+        lastUpdated: true,
+      },
+      orderBy: { taskId: "asc" },
+    });
+
+    return NextResponse.json({ statuses });
+  } catch (error) {
+    return NextResponse.json({ error: `Failed to load statuses: ${(error as Error).message}` }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
 
   try {
