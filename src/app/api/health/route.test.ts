@@ -13,6 +13,10 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
+function setNodeEnv(value: "production" | "development") {
+  vi.stubEnv("NODE_ENV", value);
+}
+
 // ----------------------------------------------
 // 1. GET /api/health -- database OK (production)
 // ----------------------------------------------
@@ -22,7 +26,7 @@ describe("GET /api/health -- DB OK (production)", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
-    process.env.NODE_ENV = "production";
+    setNodeEnv("production");
     db.$queryRaw.mockResolvedValue([{ "?column?": 1 }]);
     db.project.findUnique.mockReset();
     const mod = await import("../health/route");
@@ -55,7 +59,7 @@ describe("GET /api/health -- DB OK (development)", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
-    process.env.NODE_ENV = "development";
+    setNodeEnv("development");
     db.$queryRaw.mockResolvedValue([{ "?column?": 1 }]);
     db.project.findUnique.mockReset();
     const mod = await import("../health/route");
@@ -80,7 +84,7 @@ describe("GET /api/health -- DB error (production)", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
-    process.env.NODE_ENV = "production";
+    setNodeEnv("production");
     db.$queryRaw.mockRejectedValue(
       new Error(
         "FATAL: remaining connection slots are reserved for non-replication superuser connections",
@@ -118,7 +122,7 @@ describe("GET /api/health -- DB error (development)", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
-    process.env.NODE_ENV = "development";
+    setNodeEnv("development");
     db.$queryRaw.mockRejectedValue(
       new Error(
         "FATAL: remaining connection slots are reserved for non-replication superuser connections",
@@ -153,7 +157,7 @@ describe("GET workbook-template -- 404 when project not found", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
-    process.env.NODE_ENV = "development";
+    setNodeEnv("development");
     db.$queryRaw.mockReset();
     db.project.findUnique.mockResolvedValue(null);
     const mod = await import("../projects/[projectId]/workbook-template/route");
@@ -181,7 +185,7 @@ describe("GET workbook-template -- success response headers and sheets", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
-    process.env.NODE_ENV = "development";
+    setNodeEnv("development");
     db.$queryRaw.mockReset();
     db.project.findUnique.mockResolvedValue({ id: "p1" });
     const mod = await import("../projects/[projectId]/workbook-template/route");

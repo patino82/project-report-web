@@ -73,12 +73,21 @@ export function criticalPath(tasks: TaskLite[]) {
   if (!tasks.length) return { path: [] as string[], totalDays: 0 };
   const byId = new Map(tasks.map((t) => [t.taskId, t]));
   const order = topologicalSort(tasks);
+  const successors = new Map<string, string[]>();
 
   const dist = new Map<string, number>();
   const prev = new Map<string, string | null>();
   for (const id of order) {
+    successors.set(id, []);
     dist.set(id, Number.NEGATIVE_INFINITY);
     prev.set(id, null);
+  }
+
+  for (const task of tasks) {
+    for (const predecessor of task.predecessors) {
+      if (!byId.has(predecessor)) continue;
+      successors.get(predecessor)!.push(task.taskId);
+    }
   }
 
   for (const id of order) {
@@ -87,9 +96,8 @@ export function criticalPath(tasks: TaskLite[]) {
       dist.set(id, Math.max(1, node.durationDays));
     }
 
-    for (const nextId of order) {
+    for (const nextId of successors.get(id) ?? []) {
       const next = byId.get(nextId)!;
-      if (!next.predecessors.includes(id)) continue;
       const cand = (dist.get(id) ?? Number.NEGATIVE_INFINITY) + Math.max(1, next.durationDays);
       if (cand > (dist.get(nextId) ?? Number.NEGATIVE_INFINITY)) {
         dist.set(nextId, cand);

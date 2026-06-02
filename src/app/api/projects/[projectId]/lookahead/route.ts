@@ -73,7 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
 
   try {

@@ -4,12 +4,16 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import { getAmplitudeClient, flushAmplitude } from "@/lib/amplitude-server";
 import { corsResponse, corsOptions } from "@/lib/cors";
+import { rateLimit } from "@/lib/rate-limit";
 
-export async function OPTIONS() {
-  return corsOptions();
+export async function OPTIONS(request: Request) {
+  return corsOptions(request);
 }
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request);
+  if (limited) return corsResponse(request, limited);
+
   const body = await request.json().catch(() => ({}));
   let idToken = body?.id_token;
   const code = body?.code;
@@ -17,7 +21,7 @@ export async function POST(request: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
-  if (!clientId) return corsResponse(NextResponse.json({ error: "GOOGLE_CLIENT_ID not configured" }, { status: 500 }));
+  if (!clientId) return corsResponse(request, NextResponse.json({ error: "GOOGLE_CLIENT_ID not configured" }, { status: 500 }));
 
   const client = new OAuth2Client(clientId, clientSecret);
 
@@ -33,22 +37,22 @@ export async function POST(request: Request) {
       idToken = tokens.id_token;
     } catch (err: any) {
       console.error("Code exchange failed", err);
-      return corsResponse(NextResponse.json({ error: "failed to exchange code", details: err.message }, { status: 401 }));
+      return corsResponse(request, NextResponse.json({ error: "failed to exchange code", details: err.message }, { status: 401 }));
     }
   }
 
-  if (!idToken) return corsResponse(NextResponse.json({ error: "id_token or code required" }, { status: 400 }));
+  if (!idToken) return corsResponse(request, NextResponse.json({ error: "id_token or code required" }, { status: 400 }));
 
   let ticket;
   try {
     ticket = await client.verifyIdToken({ idToken, audience: clientId });
   } catch (err) {
     console.error("Token verification failed", err);
-    return corsResponse(NextResponse.json({ error: "invalid id_token" }, { status: 401 }));
+    return corsResponse(request, NextResponse.json({ error: "invalid id_token" }, { status: 401 }));
   }
 
   const payload = ticket.getPayload();
-  if (!payload || !payload.email) return corsResponse(NextResponse.json({ error: "invalid token payload" }, { status: 400 }));
+  if (!payload || !payload.email) return corsResponse(request, NextResponse.json({ error: "invalid token payload" }, { status: 400 }));
 
   // Find or create user via Prisma
   let user = await prisma.user.findUnique({ where: { email: payload.email } });
@@ -63,7 +67,7 @@ export async function POST(request: Request) {
   }
 
   const secret = process.env.NEXTAUTH_SECRET;
-  if (!secret) return corsResponse(NextResponse.json({ error: "NEXTAUTH_SECRET not configured" }, { status: 500 }));
+  if (!secret) return corsResponse(request, NextResponse.json({ error: "NEXTAUTH_SECRET not configured" }, { status: 500 }));
 
   // Issue a signed JWT for the app session
   const token = jwt.sign({ sub: user.id, email: user.email, role: user.role }, secret, { expiresIn: "7d" });
@@ -75,5 +79,5 @@ export async function POST(request: Request) {
     await flushAmplitude();
   }
 
-  return corsResponse(NextResponse.json({ ok: true, token }));
+  return corsResponse(request, NextResponse.json({ ok: true, token }));
 }

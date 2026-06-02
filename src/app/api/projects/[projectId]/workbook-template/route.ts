@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import * as xlsx from "xlsx";
 import { prisma } from "@/lib/prisma";
 import {
@@ -32,7 +32,7 @@ function ensureSheet(workbook: xlsx.WorkBook, name: string, rows: Array<Array<st
   }
 }
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
 
   try {

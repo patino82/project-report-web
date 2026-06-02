@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 const statusSchema = z.object({
   taskId: z.string().min(1),
@@ -34,8 +35,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ pro
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
+  const limited = rateLimit(req);
+  if (limited) return limited;
 
   try {
     const body = await req.json();
@@ -79,3 +82,5 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
     return NextResponse.json({ error: `Failed to save status: ${(error as Error).message}` }, { status: 500 });
   }
 }
+
+export const POST = PATCH;

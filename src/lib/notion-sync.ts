@@ -1,4 +1,5 @@
 import { Client } from "@notionhq/client";
+import { prisma } from "@/lib/prisma";
 
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
@@ -28,6 +29,49 @@ export async function pushProjectToNotion(project: { name: string; location?: st
   } catch (error) {
     console.error("Failed to push project to Notion", error);
     return null;
+  }
+}
+
+export function syncProjectToNotionInBackground(project: { id: string; name: string; location?: string | null }) {
+  void (async () => {
+    try {
+      const notionId = await pushProjectToNotion({
+        name: project.name,
+        location: project.location,
+      });
+
+      if (!notionId) return;
+
+      await prisma.project.update({
+        where: { id: project.id },
+        data: { notionId },
+      });
+    } catch (error) {
+      console.error("Failed to store project Notion ID", error);
+    }
+  })();
+}
+
+export async function retryPendingProjectNotionSync(limit = 25) {
+  const projects = await prisma.project.findMany({
+    where: { notionId: null },
+    take: limit,
+    orderBy: { createdAt: "asc" },
+    select: { id: true, name: true, location: true },
+  });
+
+  for (const project of projects) {
+    const notionId = await pushProjectToNotion({
+      name: project.name,
+      location: project.location,
+    });
+
+    if (!notionId) continue;
+
+    await prisma.project.update({
+      where: { id: project.id },
+      data: { notionId },
+    });
   }
 }
 
@@ -63,6 +107,29 @@ export async function pushDailyLogToNotion(log: {
     console.error("Failed to push daily log to Notion", error);
     return null;
   }
+}
+
+export function syncDailyLogToNotionInBackground(log: {
+  id: string;
+  projectId: string;
+  notionProjectId?: string | null;
+  content: string;
+  author: string;
+  date: Date;
+}) {
+  void (async () => {
+    try {
+      const notionId = await pushDailyLogToNotion(log);
+      if (!notionId) return;
+
+      await prisma.siteLog.update({
+        where: { id: log.id },
+        data: { notionId },
+      });
+    } catch (error) {
+      console.error("Failed to store daily log Notion ID", error);
+    }
+  })();
 }
 
 export async function pushOpenItemToNotion(item: {
@@ -102,4 +169,27 @@ export async function pushOpenItemToNotion(item: {
     console.error("Failed to push open item to Notion", error);
     return null;
   }
+}
+
+export function syncOpenItemToNotionInBackground(item: {
+  id: string;
+  projectId: string;
+  notionProjectId?: string | null;
+  description: string;
+  priority: string;
+  dueDate?: Date | null;
+}) {
+  void (async () => {
+    try {
+      const notionId = await pushOpenItemToNotion(item);
+      if (!notionId) return;
+
+      await prisma.openItem.update({
+        where: { id: item.id },
+        data: { notionId },
+      });
+    } catch (error) {
+      console.error("Failed to store open item Notion ID", error);
+    }
+  })();
 }
