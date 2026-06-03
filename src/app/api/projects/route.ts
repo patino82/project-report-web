@@ -6,6 +6,7 @@ import { normalizeProjectProfile, parseOptionalDateInput } from "@/lib/project-p
 import { syncProjectToNotionInBackground } from "@/lib/notion-sync";
 import { corsResponse, corsOptions } from "@/lib/cors";
 import { rateLimit } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/api-auth";
 
 const createProjectSchema = z.object({
   name: z.string().min(1),
@@ -21,6 +22,8 @@ export async function OPTIONS(request: Request) {
 }
 
 export async function GET(request: Request) {
+  const _auth = await requireAuth(request as any);
+  if (!_auth.ok) return (_auth as any).response;
   try {
     const projects = await prisma.project.findMany({
       orderBy: { updatedAt: "desc" },
@@ -36,7 +39,8 @@ export async function GET(request: Request) {
     });
     return corsResponse(request, NextResponse.json({ projects }));
   } catch (error) {
-    return corsResponse(request, NextResponse.json({ error: `Failed to load projects: ${(error as Error).message}` }, { status: 500 }));
+    console.error("[api/projects] GET error:", error);
+    return corsResponse(request, NextResponse.json({ error: "Failed to load projects" }, { status: 500 }));
   }
 }
 
@@ -73,6 +77,7 @@ export async function POST(req: NextRequest) {
 
     return corsResponse(req, NextResponse.json({ project }, { status: 201 }));
   } catch (error) {
-    return corsResponse(req, NextResponse.json({ error: `Failed to create project: ${(error as Error).message}` }, { status: 500 }));
+    console.error("[api/projects] POST error:", error);
+    return corsResponse(req, NextResponse.json({ error: "Failed to create project" }, { status: 500 }));
   }
 }

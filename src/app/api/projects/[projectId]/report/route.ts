@@ -5,6 +5,7 @@ import { buildSummary, computeTwoWeekDates, formatDateKey } from "@/lib/domain";
 import { loadProjectBundle } from "@/lib/project-data";
 import { prisma } from "@/lib/prisma";
 import { getAmplitudeClient, flushAmplitude } from "@/lib/amplitude-server";
+import { requireAuth } from "@/lib/api-auth";
 
 function toBuffer(doc: NodeJS.ReadableStream & { end: () => void }): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -17,6 +18,10 @@ function toBuffer(doc: NodeJS.ReadableStream & { end: () => void }): Promise<Buf
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+  const __auth = await requireAuth(req);
+
+  if (!__auth.ok) return (__auth as any).response;
+
   const { projectId } = await params;
 
   try {

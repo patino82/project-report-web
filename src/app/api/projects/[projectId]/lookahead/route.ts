@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { computeTwoWeekDates, formatDateKey, parseDateKey } from "@/lib/domain";
 import { ensureProjectCalendarCurrent } from "@/lib/project-calendar";
+import { requireAuth } from "@/lib/api-auth";
 
 const upsertSchema = z.object({
   taskId: z.string().min(1),
@@ -13,6 +14,10 @@ const upsertSchema = z.object({
 });
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+  const __auth = await requireAuth(req as any);
+
+  if (!__auth.ok) return (__auth as any).response;
+
   const { projectId } = await params;
   const onlyTwoWeek = req.nextUrl.searchParams.get("twoWeek") === "1";
 
@@ -74,6 +79,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
+  const __auth = await requireAuth(req as any);
+
+  if (!__auth.ok) return (__auth as any).response;
+
   const { projectId } = await params;
 
   try {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/api-auth";
 
 const statusSchema = z.object({
   taskId: z.string().min(1),
@@ -13,6 +14,10 @@ const statusSchema = z.object({
 });
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+  const __auth = await requireAuth(_req as any);
+
+  if (!__auth.ok) return (__auth as any).response;
+
   const { projectId } = await params;
 
   try {
@@ -36,6 +41,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ pro
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
+  const __auth = await requireAuth(req as any);
+
+  if (!__auth.ok) return (__auth as any).response;
+
   const { projectId } = await params;
   const limited = rateLimit(req);
   if (limited) return limited;

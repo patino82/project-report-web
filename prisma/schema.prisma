@@ -140,7 +140,7 @@ model TaskStatus {
 
 model Company {
   id       String            @id @default(cuid())
-  name     String
+  name     String            @unique
   trades   CompanyTradeMap[]
   contacts Contact[]
 }
@@ -186,6 +186,7 @@ model LookaheadEntry {
   notes     String?
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  @@unique([projectId, taskId, date])
   @@index([projectId, date])
 }
 

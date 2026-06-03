@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/api-auth";
 
 const companySchema = z.object({
   name: z.string().min(1),
@@ -22,7 +23,9 @@ const tradeMapSchema = z.object({
   notes: z.string().optional(),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const _auth = await requireAuth(request);
+  if (!_auth.ok) return (_auth as any).response;
   const companies = await prisma.company.findMany({
     include: {
       contacts: { orderBy: [{ isPrimary: "desc" }, { name: "asc" }] },
@@ -35,6 +38,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const _auth2 = await requireAuth(req);
+  if (!_auth2.ok) return (_auth2 as any).response;
   try {
     const body = await req.json();
     const mode = body?.mode as string | undefined;
@@ -42,7 +47,7 @@ export async function POST(req: NextRequest) {
     if (mode === "company") {
       const parsed = companySchema.safeParse(body);
       if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-      const company = await (prisma.company as any).upsert({
+      const company = await prisma.company.upsert({
         where: { name: parsed.data.name },
         create: { name: parsed.data.name },
         update: {},
@@ -54,7 +59,7 @@ export async function POST(req: NextRequest) {
       const parsed = contactSchema.safeParse(body);
       if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-      const company = await (prisma.company as any).upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} });
+      const company = await prisma.company.upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} });
       const contact = await prisma.contact.create({
         data: {
           companyId: company.id,
@@ -73,8 +78,8 @@ export async function POST(req: NextRequest) {
       if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
       const [company, trade] = await Promise.all([
-        (prisma.company as any).upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} }),
-        (prisma.trade as any).upsert({ where: { name: parsed.data.trade }, create: { name: parsed.data.trade }, update: {} }),
+        prisma.company.upsert({ where: { name: parsed.data.company }, create: { name: parsed.data.company }, update: {} }),
+        prisma.trade.upsert({ where: { name: parsed.data.trade }, create: { name: parsed.data.trade }, update: {} }),
       ]);
 
       const map = await prisma.companyTradeMap.upsert({
@@ -96,6 +101,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ error: "Unsupported mode. Use: company, contact, tradeMap" }, { status: 400 });
   } catch (error) {
-    return NextResponse.json({ error: `Failed company op: ${(error as Error).message}` }, { status: 500 });
+    console.error("[api/companies] POST error:", error);
+    return NextResponse.json({ error: "Failed to process request" }, { status: 500 });
   }
 }

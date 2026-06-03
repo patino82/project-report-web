@@ -22,6 +22,16 @@ vi.mock("@/lib/prisma", () => ({
   prisma: prismaMock,
 }));
 
+vi.mock("@/lib/api-auth", () => ({
+  requireAuth: vi.fn().mockResolvedValue({
+    ok: true,
+    userId: "test-user-id",
+    role: "user",
+    email: "test@example.com",
+  }),
+  checkDomainAllowlist: vi.fn().mockReturnValue(null),
+}));
+
 function request(body: unknown) {
   return new Request("http://localhost/api/projects/p1/test", {
     method: "POST",

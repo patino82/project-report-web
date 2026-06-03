@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { syncOpenItemToNotionInBackground } from "@/lib/notion-sync";
 import { corsResponse, corsOptions } from "@/lib/cors";
 import { rateLimit } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/api-auth";
 
 const createItemSchema = z.object({
   description: z.string().min(1),
@@ -16,6 +17,10 @@ export async function OPTIONS(request: Request) {
 }
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+  const __auth = await requireAuth(_req as any);
+
+  if (!__auth.ok) return (__auth as any).response;
+
   const { projectId } = await params;
   try {
     const items = await prisma.openItem.findMany({
@@ -29,6 +34,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ pro
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
+  const __auth = await requireAuth(req as any);
+
+  if (!__auth.ok) return (__auth as any).response;
+
   const { projectId } = await params;
   const limited = rateLimit(req);
   if (limited) return corsResponse(req, limited);

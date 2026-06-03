@@ -54,6 +54,16 @@ export async function POST(request: Request) {
   const payload = ticket.getPayload();
   if (!payload || !payload.email) return corsResponse(request, NextResponse.json({ error: "invalid token payload" }, { status: 400 }));
 
+  // Domain allowlist check (optional — skip if ALLOWED_EMAIL_DOMAINS not set)
+  const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS;
+  if (allowedDomains) {
+    const emailDomain = payload.email.split("@")[1]?.toLowerCase();
+    const domains = allowedDomains.split(",").map((d: string) => d.trim().toLowerCase()).filter(Boolean);
+    if (!emailDomain || !domains.includes(emailDomain)) {
+      return corsResponse(request, NextResponse.json({ error: "Domain not authorized" }, { status: 403 }));
+    }
+  }
+
   // Find or create user via Prisma
   let user = await prisma.user.findUnique({ where: { email: payload.email } });
   if (!user) {
