@@ -2,7 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-muted: var(--ink-muted);
+}
+
+:root,
+:root.dark {
   --primary: #e07b35;
   --primary-light: #f0944f;
   --primary-dim: rgba(224, 123, 53, 0.1);
@@ -19,6 +30,25 @@
   --emerald: #10b981;
   --red: #ef4444;
   --amber: #f59e0b;
+}
+
+:root.light {
+  --primary: #e07b35;
+  --primary-light: #f0944f;
+  --primary-dim: rgba(224, 123, 53, 0.1);
+  --primary-glow: rgba(224, 123, 53, 0.24);
+  --background: #f6f7f8;
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface-solid: #ffffff;
+  --surface-hover: rgba(15, 23, 42, 0.04);
+  --ink: #151a20;
+  --ink-dim: #475569;
+  --ink-muted: #64748b;
+  --border: rgba(15, 23, 42, 0.1);
+  --border-bright: rgba(15, 23, 42, 0.18);
+  --emerald: #059669;
+  --red: #dc2626;
+  --amber: #d97706;
 }
 
 body {
@@ -54,7 +84,7 @@ body {
   }
 
   .tma-card-inner {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1rem;
@@ -96,7 +126,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--surface-hover);
     color: var(--ink);
     font-weight: 900;
     font-size: 0.75rem;
@@ -111,7 +141,7 @@ body {
     line-height: 1;
   }
   .tma-button-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--border);
   }
   .tma-button-secondary:active {
     transform: scale(0.95);
@@ -146,7 +176,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 50;
-    background-color: rgba(11, 14, 18, 0.8);
+    background-color: color-mix(in srgb, var(--background) 82%, transparent);
     backdrop-filter: blur(20px);
     padding: 2rem 1.5rem;
     border-bottom: 1px solid var(--border);
@@ -244,12 +274,12 @@ body {
     letter-spacing: 0.1em;
     border: 1px solid var(--border);
     color: var(--ink-dim);
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
   }
 
   /* ── Inline form elements ── */
   .tma-input {
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0.625rem 0.875rem;
@@ -267,7 +297,7 @@ body {
   }
 
   .tma-select {
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0.625rem 0.875rem;
@@ -298,7 +328,7 @@ body {
 
   /* ── Lookahead grid cell ── */
   .tma-cell {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 0.5rem;
@@ -325,7 +355,7 @@ body {
 
   /* ── Phase nav tab ── */
   .tma-phase-tab {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 0.75rem 1rem;
@@ -349,7 +379,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 50;
-    background-color: rgba(11, 14, 18, 0.9);
+    background-color: color-mix(in srgb, var(--background) 90%, transparent);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     padding: 0.75rem 1.5rem;
@@ -369,7 +399,7 @@ body {
     gap: 0.25rem;
     padding: 1rem;
     border-right: 1px solid var(--border);
-    background-color: rgba(11, 14, 18, 0.6);
+    background-color: color-mix(in srgb, var(--background) 72%, transparent);
     backdrop-filter: blur(12px);
     min-width: 180px;
   }
@@ -380,12 +410,13 @@ body {
   /* ── Segmented control ── */
   .tma-segmented {
     display: inline-flex;
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
   }
   .tma-segmented a,
+  .tma-segmented button,
   .tma-segmented span {
     padding: 0.5rem 1rem;
     font-size: 0.65rem;
@@ -395,8 +426,11 @@ body {
     color: var(--ink-dim);
     cursor: pointer;
     transition: all 0.15s;
+    background: transparent;
+    border: 0;
   }
   .tma-segmented .is-active,
+  .tma-segmented button.is-active,
   .tma-segmented a.active {
     background-color: var(--primary);
     color: var(--background);
@@ -408,7 +442,7 @@ body {
     align-items: center;
     padding: 0.25rem 0.75rem;
     background-color: var(--primary-dim);
-    border: 1px solid rgba(224, 123, 53, 0.2);
+    border: 1px solid var(--primary-dim);
     border-radius: 999px;
     font-size: 0.65rem;
     font-weight: 900;
@@ -423,7 +457,7 @@ body {
     display: inline-flex;
     align-items: center;
     padding: 0.2rem 0.6rem;
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 0.6rem;
@@ -496,7 +530,7 @@ body {
     gap: 0.25rem;
     padding: 1rem;
     border-right: 1px solid var(--border);
-    background-color: rgba(11, 14, 18, 0.6);
+    background-color: color-mix(in srgb, var(--background) 72%, transparent);
     backdrop-filter: blur(12px);
     min-width: 180px;
   }
@@ -577,7 +611,7 @@ body {
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 0.375rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-hover);
   }
   .tma-live-count strong {
     display: block;
@@ -726,7 +760,7 @@ body {
 
   /* ── Boss email textarea ── */
   .tma-email-textarea {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1rem;
@@ -744,7 +778,7 @@ body {
 
   /* ── Topbar search placeholder ── */
   .tma-search-placeholder {
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0.5rem 0.875rem;
@@ -758,7 +792,7 @@ body {
     align-items: center;
     gap: 0.375rem;
     padding: 0.25rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 999px;
     font-size: 0.65rem;
@@ -804,6 +838,47 @@ body {
     letter-spacing: 0.05em;
   }
 
+  .tma-brand-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    object-fit: contain;
+    background-color: var(--surface-solid);
+    border: 1px solid var(--border);
+    padding: 0.2rem;
+  }
+
+  .tma-theme-header {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: color-mix(in srgb, var(--background) 88%, transparent);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+  }
+
+  .tma-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background-color: var(--surface-hover);
+    color: var(--ink-dim);
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  }
+  .tma-icon-button:hover {
+    color: var(--ink);
+    border-color: var(--border-bright);
+  }
+
   /* ── User chip ── */
   .tma-user-chip {
     display: inline-flex;
@@ -816,7 +891,7 @@ body {
     color: var(--primary);
     font-size: 0.7rem;
     font-weight: 900;
-    border: 1px solid rgba(224, 123, 53, 0.2);
+    border: 1px solid var(--primary-dim);
   }
 
   /* ── Mode toggle panel ── */
@@ -826,7 +901,7 @@ body {
     justify-content: space-between;
     gap: 1rem;
     padding: 0.75rem 1rem;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 14px;
     margin-top: 0.75rem;
@@ -906,6 +981,84 @@ body {
     color: var(--background);
   }
 
+  /* ── Settings controls ── */
+  .tma-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .tma-swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 88px;
+    padding: 0.85rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background-color: var(--surface-hover);
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+  }
+  .tma-swatch:hover,
+  .tma-swatch-active {
+    border-color: var(--primary);
+    color: var(--ink);
+  }
+  .tma-swatch-active {
+    background-color: var(--primary-dim);
+  }
+  .tma-swatch-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    color: var(--background);
+    box-shadow: 0 0 0 1px var(--border);
+  }
+  .tma-swatch span:last-child {
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .tma-color-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .tma-color-input {
+    width: 56px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background-color: transparent;
+    cursor: pointer;
+  }
+
+  .tma-logo-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 112px;
+    border: 1px dashed var(--border-bright);
+    border-radius: 14px;
+    background-color: var(--surface-hover);
+    color: var(--ink-muted);
+  }
+  .tma-logo-preview img {
+    max-width: 180px;
+    max-height: 84px;
+    object-fit: contain;
+  }
+
   /* ── Lookahead workflow ── */
   .tma-lookahead {
     display: flex;
@@ -955,7 +1108,7 @@ body {
     align-items: center;
     gap: 2px;
     padding: 0.5rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 12px;
     cursor: pointer;
@@ -1031,7 +1184,7 @@ body {
   }
   .tma-phase-stepper button {
     padding: 0.5rem 1rem;
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 0.65rem;
@@ -1118,7 +1271,7 @@ body {
   }
 
   .tma-lookahead-cell {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 0.5rem;

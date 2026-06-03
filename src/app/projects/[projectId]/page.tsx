@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { Settings } from "lucide-react";
 import { buildBossEmail, buildSummary, buildUnlock } from "@/lib/domain";
 import { loadProjectBundle } from "@/lib/project-data";
 import { BossLookaheadButton } from "@/components/boss-lookahead-button";
+import { ThemeBrandMark } from "@/components/theme-brand";
 import { WorkbookDownloadButton } from "@/components/workbook-download-button";
 import { getAmplitudeClient, flushAmplitude } from "@/lib/amplitude-server";
 
@@ -177,12 +179,8 @@ function CommandTopBar({ projectId }: { projectId: string }) {
   return (
     <header className="tma-topbar">
       <Link className="tma-button-secondary text-[0.65rem] py-2 px-3" href="/">Menu</Link>
-      <Link className="tma-brand" href="/">
-        <span className="tma-brand-dot" />
-        <span className="tma-brand-text">
-          <strong>LOOKAHEAD</strong>
-          <small>Field Command</small>
-        </span>
+      <Link href="/" aria-label="Project Lookahead home">
+        <ThemeBrandMark />
       </Link>
       <nav className="tma-segmented" aria-label="Primary">
         <Link className="active" href={`/projects/${projectId}`}>Hub</Link>
@@ -191,6 +189,9 @@ function CommandTopBar({ projectId }: { projectId: string }) {
       </nav>
       <div className="tma-search-placeholder">Search jobs, tasks, subs</div>
       <div className="tma-weather"><span /> Clear 79F / 5 mph</div>
+      <Link className="tma-icon-button" href="/settings" aria-label="Theme settings" title="Theme settings">
+        <Settings className="h-4 w-4" />
+      </Link>
       <Link className="tma-button text-[0.65rem] py-2 px-4" href={`/projects/${projectId}/lookahead`}>2-Week & Workbook</Link>
       <div className="tma-user-chip">Dave</div>
     </header>
