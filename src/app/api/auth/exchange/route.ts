@@ -89,5 +89,5 @@ export async function POST(request: Request) {
     await flushAmplitude();
   }
 
-  return corsResponse(request, NextResponse.json({ ok: true, token }));
+  return corsResponse(request, NextResponse.json({ ok: true, token, expiresIn: 7 * 24 * 3600, isNewUser }));
 }
